@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kitten Sorbet - A cozy shop management game with Benjamin the cat">
+    <title>Kitten Sorbet - Benjamin's Shop</title>
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="images/benjamin.png" as="image">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" as="style">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Default theme - Soft Pastel */
+            --soft-pink: #ffd6e0;
+            --light-pink: #ffecf0;
+            --pastel-pink: #ffb6c1;
+            --pastel-yellow: #fff0b5;
+            --warm-yellow: #ffdb94;
+            --soft-blue: #d6e5ff;
+            --cream: #fffaf0;
+            --light-wood: #e6c49b;
+            --wood: #d9b38c;
+            --peach: #ffb997;
+            --text-color: #6d5a50;
+            --pixel-border: 1px;
+            --shadow-color: rgba(109, 90, 80, 0.15);
+            --transition-speed: 0.3s;
+        }
+        
+        /* Mint theme */
+        [data-theme="mint"] {
+            --soft-pink: #c5e8d1;
+            --light-pink: #e8f5ed;
+            --pastel-pink: #97d1aa;
+            --pastel-yellow: #e8f5e0;
+            --warm-yellow: #bcd99b;
+            --soft-blue: #d1e8e3;
+            --cream: #f0f5f0;
+            --light-wood: #b4c9a9;
+            --wood: #95b087;
+            --peach: #d1e8bd;
+            --text-color: #4a624c;
+        }
+        
+        /* Lavender theme */
+        [data-theme="lavender"] {
+            --soft-pink: #e0d6ff;
+            --light-pink: #f0ecff;
+            --pastel-pink: #c9b6ff;
+            --pastel-yellow: #e5d6ff;
+            --warm-yellow: #d4bcf7;
+            --soft-blue: #d6dbff;
+            --cream: #f5f0ff;
+            --light-wood: #c2b6d9;
+            --wood: #a894d9;
+            --peach: #e2c9ff;
+            --text-color: #5d5172;
+        }
+        
+        * {
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--soft-pink);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            overflow: hidden;
+            font-size: 16px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Accessibility focus styles */
+        :focus {
+            outline: 2px solid var(--pastel-pink);
+            outline-offset: 2px;
+        }
+        
+        /* Main Game Window */
+        .game-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--light-pink);
+            position: relative;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .shop-scene {
+            flex: 1;
+            background-color: var(--soft-blue);
+            position: relative;
+            overflow: hidden;
+            border-bottom: var(--pixel-border) solid var(--pastel-pink);
+            image-rendering: pixelated;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .shop-counter {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            width: 80%;
+            height: 20%;
+            background-color: var(--wood);
+            border: var(--pixel-border) solid var(--light-wood);
+            border-bottom: 4px solid var(--light-wood);
+            border-radius: 4px;
+            transition: background-color var(--transition-speed) ease, transform 0.2s ease;
+        }
+        
+        .shop-shelves {
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            width: 90%;
+            height: 50%;
+            background-color: var(--light-wood);
+            border: var(--pixel-border) solid var(--wood);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            border-radius: 4px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .shelf-row {
+            flex: 1;
+            background-color: var(--wood);
+            display: flex;
+            padding: 5px;
+            gap: 10px;
+            border-radius: 2px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .shelf-item {
+            width: 40px;
+            height: 40px;
+            background-color: var(--cream);
+            border: 1px solid var(--text-color);
+            border-radius: 2px;
+            transition: background-color var(--transition-speed) ease, transform 0.2s ease;
+        }
+        
+        .shelf-item.filled {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .shop-cat {
+            position: absolute;
+            bottom: 25%;
+            left: 45%;
+            width: 100px;
+            height: 100px;
+            background-image: url('images/benjamin.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        
+        .shop-cat:hover {
+            transform: scale(1.05);
+        }
+        
+        .shop-display {
+            position: absolute;
+            bottom: 30%;
+            left: 20%;
+            width: 60%;
+            height: 20%;
+            background-color: var(--cream);
+            border: var(--pixel-border) solid var(--wood);
+            display: flex;
+            padding: 5px;
+            gap: 5px;
+            overflow: hidden;
+            border-radius: 4px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .display-item {
+            flex: 1;
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 3px;
+            transition: transform 0.2s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .display-item.filled {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .computer-screen {
+            position: absolute;
+            width: 35%;
+            height: 45%;
+            top: 15%;
+            right: 10%;
+            background-color: var(--cream);
+            border: 2px solid var(--pastel-pink);
+            box-shadow: 0 0 5px rgba(109, 90, 80, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .computer-screen:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(109, 90, 80, 0.25);
+        }
+        
+        .screen-header {
+            background-color: var(--pastel-pink);
+            color: var(--text-color);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            border-bottom: 1px solid var(--soft-pink);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .screen-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: var(--light-pink);
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.4;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        /* Scrollbar styling */
+        .screen-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .screen-body::-webkit-scrollbar-track {
+            background: var(--light-pink);
+            border-radius: 4px;
+        }
+        
+        .screen-body::-webkit-scrollbar-thumb {
+            background-color: var(--pastel-pink);
+            border-radius: 4px;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            height: 160px;
+            background-color: var(--wood);
+            display: flex;
+            padding: 10px;
+            gap: 12px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .dashboard-panel {
+            flex: 1;
+            background-color: var(--cream);
+            border: var(--pixel-border) solid var(--pastel-pink);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .dashboard-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .dashboard-panel h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-color);
+            text-align: center;
+            border-bottom: 1px solid var(--pastel-pink);
+            padding-bottom: 6px;
+            font-weight: 600;
+            transition: color var(--transition-speed) ease;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: var(--pastel-yellow);
+            display: flex;
+            flex-direction: column;
+            border-left: var(--pixel-border) solid var(--warm-yellow);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .theme-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid var(--text-color);
+            transition: transform 0.2s ease;
+        }
+        
+        .theme-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .theme-btn.active {
+            border: 2px solid var(--text-color);
+        }
+        
+        #pastelTheme {
+            background: linear-gradient(to right, #ffd6e0, #ffb6c1);
+        }
+        
+        #mintTheme {
+            background: linear-gradient(to right, #c5e8d1, #97d1aa);
+        }
+        
+        #lavenderTheme {
+            background: linear-gradient(to right, #e0d6ff, #c9b6ff);
+        }
+        
+        .business-paths {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+        }
+        
+        .path-button {
+            flex: 1;
+            padding: 15px 10px;
+            border: 1px solid var(--wood);
+            background-color: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color var(--transition-speed) ease;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .path-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .path-button.active {
+            background-color: var(--soft-pink);
+            border-color: var(--pastel-pink);
+        }
+        
+        .path-button img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            image-rendering: pixelated;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background-color: var(--warm-yellow);
+            border-bottom: var(--pixel-border) solid var(--wood);
+            border-top: var(--pixel-border) solid var(--wood);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+            border-right: 1px solid var(--wood);
+            transition: background-color 0.2s ease, color var(--transition-speed) ease;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab:hover {
+            background-color: var(--peach);
+        }
+        
+        .tab.active {
+            background-color: var(--soft-pink);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        /* Main content area */
+        .content-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: var(--cream);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        /* Content area scrollbar */
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content-area::-webkit-scrollbar-track {
+            background: var(--cream);
+            border-radius: 4px;
+        }
+        
+        .content-area::-webkit-scrollbar-thumb {
+            background-color: var(--pastel-pink);
+            border-radius: 4px;
+        }
+        
+        /* Wholesale Catalog */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .catalog-item {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color var(--transition-speed) ease;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .catalog-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .catalog-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+        
+        .catalog-item-info {
+            padding: 10px;
+        }
+        
+        .catalog-item-price {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+        
+        .catalog-item-price span:last-child {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        .profit-indicator {
+            background-color: var(--pastel-yellow);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        /* Creator Studio */
+        .canvas-container {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .canvas-header {
+            background-color: var(--pastel-pink);
+            color: var(--text-color);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--soft-pink);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .drawing-canvas {
+            height: 200px;
+            border: 1px dashed var(--pastel-pink);
+            margin: 10px;
+            position: relative;
+            background-color: white;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            grid-template-rows: repeat(16, 1fr);
+            gap: 1px;
+        }
+        
+        .pixel {
+            background-color: white;
+            width: 100%;
+            height: 100%;
+            transition: background-color 0.1s ease;
+        }
+        
+        .pixel:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-gap: 5px;
+            margin: 10px;
+        }
+        
+        .color-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--pastel-pink);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: transform 0.2s ease;
+        }
+        
+        .color-cell.active {
+            border: 2px solid var(--text-color);
+            box-shadow: 0 0 4px rgba(109, 90, 80, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .drawing-tools {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px 10px 10px;
+        }
+        
+        .templates-btn {
+            background-color: var(--pastel-yellow);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .templates-btn:hover {
+            background-color: var(--warm-yellow);
+        }
+        
+        .clear-btn {
+            background-color: var(--pastel-pink);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .clear-btn:hover {
+            background-color: var(--soft-pink);
+        }
+        
+        .templates-panel {
+            display: none;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .template {
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .template:hover {
+            transform: scale(1.05);
+        }
+        
+        .template img {
+            width: 100%;
+            height: auto;
+        }
+        
+        /* Product Templates */
+        .template-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .product-template {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            padding: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color var(--transition-speed) ease;
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .product-template:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .product-template.active {
+            background-color: var(--soft-pink);
+            border-color: var(--pastel-pink);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .product-template img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+        
+        /* Orders Panel */
+        .orders-panel {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .order-card {
+            background-color: var(--light-pink);
+            margin-bottom: 10px;
+            border: 1px solid var(--pastel-pink);
+            padding: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color var(--transition-speed) ease;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .order-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .order-top {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .order-avatar {
+            width: 50px;
+            height: 50px;
+            border: 1px solid var(--pastel-pink);
+            margin-right: 10px;
+            border-radius: 6px;
+        }
+        
+        .order-details {
+            flex: 1;
+        }
+        
+        .order-timer {
+            height: 4px;
+            background-color: var(--pastel-yellow);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .timer-progress {
+            height: 100%;
+            background-color: var(--warm-yellow);
+            width: 100%;
+            transition: width 1s linear;
+        }
+        
+        .order-items {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .order-item {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--pastel-pink);
+            background-color: var(--cream);
+            border-radius: 4px;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .inventory-item {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+            transition: transform 0.2s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .inventory-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .inventory-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+        
+        .inventory-details {
+            padding: 10px;
+            font-size: 16px;
+        }
+        
+        .inventory-actions {
+            display: flex;
+            gap: 5px;
+            padding: 0 10px 10px 10px;
+        }
+        
+        .inventory-btn {
+            flex: 1;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--pastel-yellow);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .inventory-btn:hover {
+            background-color: var(--warm-yellow);
+        }
+        
+        /* Animals in shop */
+        .animal-customer {
+            position: absolute;
+            width: 70px;
+            height: 90px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            image-rendering: pixelated;
+        }
+        
+        .animal-customer:hover {
+            transform: scale(1.1);
+        }
+        
+        .dialog-box {
+            position: absolute;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            padding: 15px;
+            max-width: 300px;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(109, 90, 80, 0.15);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .dialog-box img {
+            width: 70px;
+            height: 70px;
+            border: 1px solid var(--pastel-pink);
+            float: left;
+            margin-right: 15px;
+            border-radius: 8px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        /* Buttons */
+        button {
+            background-color: var(--pastel-yellow);
+            color: var(--text-color);
+            border: 1px solid var(--warm-yellow);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        button:hover {
+            background-color: var(--warm-yellow);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(109, 90, 80, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(109, 90, 80, 0.15);
+        }
+        
+        .accent-button {
+            background-color: var(--soft-pink);
+            border-color: var(--pastel-pink);
+        }
+        
+        .accent-button:hover {
+            background-color: var(--pastel-pink);
+        }
+        
+        .save-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        /* Stats */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+        
+        .badge {
+            background-color: var(--soft-pink);
+            color: var(--text-color);
+            padding: 0px 6px;
+            border: 1px solid var(--pastel-pink);
+            font-size: 14px;
+            margin-left: 5px;
+            border-radius: 4px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            background-color: var(--light-pink);
+            height: 8px;
+            width: 100%;
+            margin-top: 5px;
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .progress-bar {
+            background-color: var(--pastel-pink);
+            height: 6px;
+            width: 0%;
+            transition: width 0.3s ease, background-color var(--transition-speed) ease;
+        }
+        
+        /* Design mockups */
+        .mockup-preview {
+            background-color: var(--light-pink);
+            padding: 15px;
+            border: 1px solid var(--pastel-pink);
+            margin-top: 15px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .mockup-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+            border: 1px solid var(--pastel-pink);
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .mockup-design {
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            background-color: white;
+            border: 1px dashed var(--pastel-pink);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        /* Gentle animations */
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .float-animation {
+            animation: float 3s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse-animation {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        
+        @keyframes blink {
+            0%, 95%, 100% { transform: scaleY(1); }
+            97% { transform: scaleY(0.1); }
+        }
+        
+        .blink-animation {
+            animation: blink 4s infinite ease-in-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.2) rotate(5deg); }
+            40% { transform: scale(1.2) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            60% { transform: scale(1.2) rotate(-5deg); }
+            70% { transform: scale(1.2) rotate(0deg); }
+            100% { transform: scale(1); }
+        }
+        
+        .celebrate-animation {
+            animation: celebrate 1s ease-in-out;
+        }
+        
+        /* Logo */
+        .logo {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--text-color);
+            transition: color var(--transition-speed) ease;
+        }
+        
+        /* Tips and Educational elements */
+        .tip-box {
+            background-color: var(--pastel-yellow);
+            border: 1px solid var(--warm-yellow);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            position: relative;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .tip-box::before {
+            content: "💡";
+            margin-right: 5px;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        /* Forecast tool */
+        .forecast-panel {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .forecast-chart {
+            height: 100px;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .forecast-bar {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            background-color: var(--pastel-pink);
+            transition: height 0.5s ease;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            padding: 10px 15px;
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Special customer */
+        .special-badge {
+            background-color: var(--soft-pink);
+            color: var(--text-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+            margin-left: 5px;
+            border: 1px solid var(--pastel-pink);
+        }
+        
+        .special-badge::before {
+            content: "★";
+            margin-right: 3px;
+        }
+        
+        /* Tutorial overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tutorial-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .tutorial-card {
+            background-color: var(--cream);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .tutorial-card h3 {
+            margin-top: 0;
+        }
+        
+        .tutorial-image {
+            width: 120px;
+            height: 120px;
+            margin: 15px auto;
+        }
+        
+        .tutorial-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .tutorial-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--light-pink);
+            margin: 0 5px;
+            display: inline-block;
+        }
+        
+        .tutorial-dot.active {
+            background-color: var(--pastel-pink);
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--cream);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, background-color var(--transition-speed) ease;
+        }
+        
+        .loading-image {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            animation: float 2s infinite ease-in-out;
+        }
+        
+        /* Cat emotions */
+        .cat-emotion {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease, top 0.3s ease;
+        }
+        
+        .cat-emotion.show {
+            opacity: 1;
+            top: -30px;
+        }
+        
+        /* Math mini-game */
+        .math-game {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .math-question {
+            font-size: 20px;
+            margin: 15px 0;
+        }
+        
+        .math-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .math-option {
+            padding: 10px 15px;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .math-option:hover {
+            background-color: var(--soft-pink);
+            transform: translateY(-2px);
+        }
+        
+        /* Calendar for events */
+        .calendar {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .calendar-day {
+            height: 30px;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .calendar-day.event {
+            background-color: var(--pastel-yellow);
+            position: relative;
+        }
+        
+        .calendar-day.event::after {
+            content: "";
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--pastel-pink);
+        }
+        
+        /* Daily goal */
+        .daily-goal {
+            background-color: var(--pastel-yellow);
+            border: 1px solid var(--warm-yellow);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        .goal-progress {
+            background-color: var(--cream);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .goal-bar {
+            height: 100%;
+            background-color: var(--pastel-pink);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                order: 2;
+            }
+            
+            .game-view {
+                height: 70vh;
+            }
+            
+            .dashboard {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .computer-screen {
+                width: 70%;
+                height: 40%;
+            }
+            
+            .shop-cat {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .catalog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .business-paths {
+                flex-direction: column;
+            }
+            
+            .shop-shelves {
+                height: 40%;
+            }
+            
+            .computer-screen {
+                width: 90%;
+                left: 5%;
+                right: auto;
+            }
+            
+            .shop-display {
+                width: 80%;
+            }
+            
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (orientation: landscape) and (max-height: 500px) {
+            .shop-scene {
+                height: 60vh;
+            }
+            
+            .dashboard {
+                height: 120px;
+            }
+            
+            .computer-screen {
+                height: 60%;
+            }
+        }
+    </style>
+</head>
+<body data-theme="pastel">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <img src="images/benjamin.png" alt="Benjamin" class="loading-image">
+        <h2>Loading Kitten Sorbet...</h2>
+        <p>Benjamin is preparing the shop!</p>
+    </div>
+    
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-card">
+            <h3>Welcome to Kitten Sorbet!</h3>
+            <img src="images/benjamin.png" alt="Benjamin" class="tutorial-image">
+            <p>Hi, I'm Benjamin! I'll help you run your very own online shop!</p>
+            <p>Let me show you how everything works.</p>
+            <div class="tutorial-controls">
+                <button id="skipTutorial">Skip</button>
+                <div>
+                    <span class="tutorial-dot active"></span>
+                    <span class="tutorial-dot"></span>
+                    <span class="tutorial-dot"></span>
+                </div>
+                <button id="nextTutorial" class="accent-button">Next</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        New order received!
+    </div>
+    
+    <div class="container">
+        <!-- Main Game View -->
+        <div class="game-view">
+            <!-- Shop Scene -->
+            <div class="shop-scene" id="shopScene">
+                <!-- Shop background elements -->
+                <div class="shop-shelves">
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                </div>
+                
+                <div class="shop-counter"></div>
+                <div class="shop-display">
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                </div>
+                
+                <div class="shop-cat float-animation" id="shopCat">
+                    <div class="cat-emotion" id="catEmotion">😊</div>
+                </div>
+                
+                <!-- Computer screen in the shop -->
+                <div class="computer-screen">
+                    <div class="screen-header">
+                        <div class="logo">
+                            <span>kittensorbet.com</span>
+                        </div>
+                        <div>Coins: <span id="coinCount">100</span></div>
+                    </div>
+                    <div class="screen-body" id="screenContent">
+                        <!-- Screen content will be dynamically loaded here -->
+                        <div style="text-align: center; padding: 20px;">
+                            <h3>Welcome to Kitten Sorbet!</h3>
+                            <p>Benjamin is excited to help you start your business!</p>
+                            <p>Choose your business path and start selling!</p>
+                            
+                            <div class="daily-goal">
+                                <div><strong>Today's Goal:</strong> Make 50 coins in sales</div>
+                                <div class="goal-progress">
+                                    <div class="goal-bar" id="goalBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="tip-box">
+                                <div class="tip-title">Benjamin's Tip:</div>
+                                <p>Start by buying some products or creating designs to sell!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dialog box for interactions -->
+                <div class="dialog-box" id="dialogBox">
+                    <img src="images/animal1.png" id="dialogImage" alt="Animal">
+                    <div id="dialogText">Hello! I'm looking for something special!</div>
+                    <div class="dialog-buttons">
+                        <button id="dialogClose">Ok!</button>
+                        <button id="dialogAccept" class="accent-button">I'll help!</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard -->
+            <div class="dashboard">
+                <div class="dashboard-panel stats-panel">
+                    <h3>Shop Stats</h3>
+                    <div class="stat-item">
+                        <span>Customers:</span>
+                        <span>12 <span class="badge">+3</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Popularity:</span>
+                        <span>★★★☆☆</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Level:</span>
+                        <span>2</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 45%"></div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-panel orders-panel">
+                    <h3>Current Orders</h3>
+                    <div id="ordersList">
+                        <!-- Orders will be added dynamically -->
+                        <div class="order-card">
+                            <div class="order-top">
+                                <img src="images/animal1.png" class="order-avatar" alt="Customer">
+                                <div class="order-details">
+                                    <strong>Bunny</strong>
+                                    <div>Wants: Cute T-shirt</div>
+                                    <div>Reward: 25 coins</div>
+                                </div>
+                            </div>
+                            <div class="order-timer">
+                                <div class="timer-progress"></div>
+                            </div>
+                            <div class="order-items">
+                                <div class="order-item"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 style="text-align: center; margin: 15px 0; color: var(--text-color);">Kitten Sorbet</h2>
+                <div class="theme-selector">
+                    <div class="theme-btn active" id="pastelTheme" title="Pastel Theme"></div>
+                    <div class="theme-btn" id="mintTheme" title="Mint Theme"></div>
+                    <div class="theme-btn" id="lavenderTheme" title="Lavender Theme"></div>
+                </div>
+            </div>
+            
+            <!-- Business Path Selection -->
+            <div class="business-paths">
+                <div class="path-button active" id="curatorPath">
+                    <img src="images/curator-icon.png" alt="Curator">
+                    <span>Curator</span>
+                    <small>Buy & Resell</small>
+                </div>
+                <div class="path-button" id="creatorPath">
+                    <img src="images/creator-icon.png" alt="Creator">
+                    <span>Creator</span>
+                    <small>Design & Sell</small>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="shop">Shop</div>
+                <div class="tab" data-tab="inventory">Inventory</div>
+                <div class="tab" data-tab="customize">Customize</div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content-area" id="contentArea">
+                <!-- Content will be loaded dynamically based on tab and business path -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            coins: 100,
+            businessPath: 'curator', // 'curator' or 'creator'
+            activeTab: 'shop',
+            inventory: [],
+            orders: [],
+            customerCount: 12,
+            level: 2,
+            progress: 45,
+            popularity: 3,
+            curatedProducts: [],
+            createdDesigns: [],
+            shopName: "Kitten Sorbet",
+            ownerName: "Benjamin",
+            dailyGoal: 50,
+            currentProgress: 0,
+            firstVisit: true,
+            specialCustomerChance: 0.2,
+            theme: 'pastel',
+            tips: [
+                "Buying items at wholesale and selling at retail creates your profit margin!",
+                "Custom designed items often have higher profit margins!",
+                "Popular items sell faster and can be priced higher!",
+                "Keep an eye on your inventory to make sure you have what customers want.",
+                "Special customers pay more for unique items!",
+                "Completing orders quickly increases your shop's popularity.",
+                "Don't forget to check the forecast to see what might sell well tomorrow!"
+            ],
+            currentCanvas: [],
+            events: {
+                current: null,
+                upcoming: [
+                    { name: "Summer Sale", date: "2025-06-15", bonus: "10% more customers" },
+                    { name: "Back to School", date: "2025-09-01", bonus: "Higher demand for stationery" }
+                ]
+            },
+            achievements: [],
+            savedDesigns: [],
+            savedColorPalettes: [],
+            petCount: 0
+        };
+        
+        // DOM elements
+        const shopScene = document.getElementById('shopScene');
+        const screenContent = document.getElementById('screenContent');
+        const contentArea = document.getElementById('contentArea');
+        const coinCount = document.getElementById('coinCount');
+        const dialogBox = document.getElementById('dialogBox');
+        const dialogText = document.getElementById('dialogText');
+        const dialogImage = document.getElementById('dialogImage');
+        const dialogClose = document.getElementById('dialogClose');
+        const dialogAccept = document.getElementById('dialogAccept');
+        const curatorPath = document.getElementById('curatorPath');
+        const creatorPath = document.getElementById('creatorPath');
+        const tabs = document.querySelectorAll('.tab');
+        const shopCat = document.getElementById('shopCat');
+        const catEmotion = document.getElementById('catEmotion');
+        const notification = document.getElementById('notification');
+        const goalBar = document.getElementById('goalBar');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const skipTutorial = document.getElementById('skipTutorial');
+        const nextTutorial = document.getElementById('nextTutorial');
+        const pastelTheme = document.getElementById('pastelTheme');
+        const mintTheme = document.getElementById('mintTheme');
+        const lavenderTheme = document.getElementById('lavenderTheme');
+        
+        // Sample data for the shop
+        const wholesaleCatalog = [
+            { id: 1, name: 'Cute Plushie', category: 'Toys', price: 15, image: 'images/plushie.png', markup: 10 },
+            { id: 2, name: 'Handmade Soap', category: 'Bath', price: 8, image: 'images/soap.png', markup: 12 },
+            { id: 3, name: 'Wooden Puzzle', category: 'Toys', price: 12, image: 'images/puzzle.png', markup: 8 },
+            { id: 4, name: 'Scented Candle', category: 'Home', price: 10, image: 'images/candle.png', markup: 15 },
+            { id: 5, name: 'Handmade Mug', category: 'Kitchen', price: 9, image: 'images/mug.png', markup: 11 },
+            { id: 6, name: 'Pixel Art Print', category: 'Decor', price: 7, image: 'images/print.png', markup: 13 }
+        ];
+        
+        const productTemplates = [
+            { id: 1, name: 'T-Shirt', category: 'Clothing', baseCost: 12, image: 'images/tshirt.png' },
+            { id: 2, name: 'Sticker', category: 'Stationery', baseCost: 3, image: 'images/sticker.png' },
+            { id: 3, name: 'Mug', category: 'Home', baseCost: 8, image: 'images/mug-template.png' },
+            { id: 4, name: 'Tote Bag', category: 'Bags', baseCost: 10, image: 'images/tote.png' }
+        ];
+        
+        const animals = [
+            { name: 'Bunny', image: 'images/bunny.png', x: 20, y: 70, special: false },
+            { name: 'Fox', image: 'images/fox.png', x: 70, y: 75, special: false },
+            { name: 'Cat', image: 'images/cat.png', x: 40, y: 65, special: false },
+            { name: 'Deer', image: 'images/deer.png', x: 30, y: 80, special: true }
+        ];
+        
+        // Drawing templates
+        const drawingTemplates = [
+            { name: 'Heart', image: 'images/heart-template.png', data: [] },
+            { name: 'Star', image: 'images/star-template.png', data: [] },
+            { name: 'Flower', image: 'images/flower-template.png', data: [] }
+        ];
+        
+        // Colors for the creator mode - pastel palette
+        const pixelColors = [
+            '#ffd6e0', '#ffecf0', '#ffb6c1', '#fff0b5', '#ffdb94', '#ffb997',
+            '#d6e5ff', '#e6c49b', '#d9b38c', '#6d5a50', '#ffffff', '#000000',
+            '#ffccd5', '#fff1e6', '#fde4cf', '#fbf8cc', '#d8f3dc', '#b7e4c7',
+            '#95d5b2', '#52b788', '#fb6f92', '#f08080', '#ffc8dd', '#ffafcc',
+            '#caffbf', '#9bf6ff', '#bdb2ff', '#ffc6ff', '#fdffb6', '#a0c4ff'
+        ];
+        
+        // Tutorial steps
+        const tutorialSteps = [
+            {
+                title: "Welcome to Kitten Sorbet!",
+                content: "Hi, I'm Benjamin! I'll help you run your very own online shop!",
+                image: "images/benjamin.png"
+            },
+            {
+                title: "Choose Your Business Path",
+                content: "You can be a Curator (buy existing products) or a Creator (design your own items)!",
+                image: "images/business-paths.png"
+            },
+            {
+                title: "Complete Orders",
+                content: "Animals will visit your shop looking for items. Complete their orders to earn coins!",
+                image: "images/orders.png"
+            }
+        ];
+        
+        // Current tutorial step
+        let currentTutorialStep = 0;
+        
+        // Initialize the game
+        function initGame() {
+            // Try to load saved game state
+            loadGameState();
+            
+            // Simulate loading
+            setTimeout(() => {
+                loadingOverlay.style.opacity = "0";
+                setTimeout(() => {
+                    loadingOverlay.style.display = "none";
+                    
+                    // Show tutorial for first time visitors
+                    if (gameState.firstVisit) {
+                        showTutorial();
+                    }
+                }, 500);
+            }, 1500);
+            
+            // Set initial coins
+            updateCoins();
+            
+            // Update daily goal progress
+            updateGoalProgress();
+            
+            // Load initial content
+            loadTabContent('shop', 'curator');
+            
+            // Add event listeners for tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active tab styling
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Load content for the selected tab
+                    const tabName = tab.dataset.tab;
+                    gameState.activeTab = tabName;
+                    loadTabContent(tabName, gameState.businessPath);
+                });
+            });
+            
+            // Add event listeners for business paths
+            curatorPath.addEventListener('click', () => {
+                curatorPath.classList.add('active');
+                creatorPath.classList.remove('active');
+                gameState.businessPath = 'curator';
+                loadTabContent(gameState.activeTab, 'curator');
+            });
+            
+            creatorPath.addEventListener('click', () => {
+                creatorPath.classList.add('active');
+                curatorPath.classList.remove('active');
+                gameState.businessPath = 'creator';
+                loadTabContent(gameState.activeTab, 'creator');
+            });
+            
+            // Dialog event listeners
+            dialogClose.addEventListener('click', () => {
+                dialogBox.style.display = 'none';
+            });
+            
+            // Benjamin interaction
+            shopCat.addEventListener('click', () => {
+                petBenjamin();
+            });
+            
+            // Theme selectors
+            pastelTheme.addEventListener('click', () => {
+                changeTheme('pastel');
+            });
+            
+            mintTheme.addEventListener('click', () => {
+                changeTheme('mint');
+            });
+            
+            lavenderTheme.addEventListener('click', () => {
+                changeTheme('lavender');
+            });
+            
+            // Tutorial controls
+            skipTutorial.addEventListener('click', () => {
+                hideTutorial();
+                gameState.firstVisit = false;
+                saveGameState();
+            });
+            
+            nextTutorial.addEventListener('click', () => {
+                nextTutorialStep();
+            });
+            
+            // Apply saved theme
+            applyTheme();
+            
+            // Spawn animals in the shop
+            spawnAnimals();
+            
+            // Start random events
+            scheduleRandomEvents();
+            
+            // Make Benjamin blink occasionally
+            setInterval(() => {
+                if (Math.random() < 0.3) { // 30% chance to blink
+                    shopCat.classList.add('blink-animation');
+                    setTimeout(() => {
+                        shopCat.classList.remove('blink-animation');
+                    }, 4000);
+                }
+            }, 10000);
+        }
+        
+        // Pet Benjamin
+        function petBenjamin() {
+            gameState.petCount++;
+            
+            // Show emotion
+            catEmotion.textContent = "😻";
+            catEmotion.classList.add('show');
+            
+            // Add celebration animation
+            shopCat.classList.add('celebrate-animation');
+            
+            // Remove after a delay
+            setTimeout(() => {
+                catEmotion.classList.remove('show');
+                shopCat.classList.remove('celebrate-animation');
+            }, 1000);
+            
+            // Give special rewards for petting milestones
+            if (gameState.petCount === 10) {
+                showNotification("Benjamin gave you 5 coins for being a good friend!");
+                gameState.coins += 5;
+                updateCoins();
+                saveGameState();
+            } else if (gameState.petCount === 50) {
+                showNotification("Benjamin gave you a special discount on all products!");
+                // Apply a temporary discount effect
+                applyDiscount();
+            }
+        }
+        
+        // Apply discount
+        function applyDiscount() {
+            // Implementation of temporary discount
+            // This could reduce the cost of items for a limited time
+        }
+        
+        // Change theme
+        function changeTheme(theme) {
+            // Remove active class from all theme buttons
+            pastelTheme.classList.remove('active');
+            mintTheme.classList.remove('active');
+            lavenderTheme.classList.remove('active');
+            
+            // Set active class on selected theme
+            if (theme === 'pastel') {
+                pastelTheme.classList.add('active');
+            } else if (theme === 'mint') {
+                mintTheme.classList.add('active');
+            } else if (theme === 'lavender') {
+                lavenderTheme.classList.add('active');
+            }
+            
+            // Update game state
+            gameState.theme = theme;
+            
+            // Apply theme
+            applyTheme();
+            
+            // Save change
+            saveGameState();
+        }
+        
+        // Apply theme
+        function applyTheme() {
+            document.body.setAttribute('data-theme', gameState.theme);
+        }
+        
+        // Show tutorial
+        function showTutorial() {
+            tutorialOverlay.classList.add('show');
+            updateTutorialContent();
+        }
+        
+        // Hide tutorial
+        function hideTutorial() {
+            tutorialOverlay.classList.remove('show');
+        }
+        
+        // Update tutorial content
+        function updateTutorialContent() {
+            const step = tutorialSteps[currentTutorialStep];
+            const tutorialCard = tutorialOverlay.querySelector('.tutorial-card');
+            
+            tutorialCard.querySelector('h3').textContent = step.title;
+            tutorialCard.querySelector('p').textContent = step.content;
+            tutorialCard.querySelector('.tutorial-image').src = step.image;
+            
+            // Update dots
+            const dots = tutorialCard.querySelectorAll('.tutorial-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentTutorialStep);
+            });
+            
+            // Update button text for last step
+            if (currentTutorialStep === tutorialSteps.length - 1) {
+                nextTutorial.textContent = "Start!";
+            } else {
+                nextTutorial.textContent = "Next";
+            }
+        }
+        
+        // Next tutorial step
+        function nextTutorialStep() {
+            currentTutorialStep++;
+            
+            if (currentTutorialStep >= tutorialSteps.length) {
+                hideTutorial();
+                gameState.firstVisit = false;
+                saveGameState();
+                return;
+            }
+            
+            updateTutorialContent();
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Schedule random events
+        function scheduleRandomEvents() {
+            // Chance of a special customer appearing
+            setInterval(() => {
+                if (Math.random() < gameState.specialCustomerChance) {
+                    spawnSpecialCustomer();
+                }
+            }, 60000); // Check every minute
+            
+            // Random business tips
+            setInterval(() => {
+                if (Math.random() < 0.3) { // 30% chance
+                    showRandomTip();
+                }
+            }, 90000); // Show every 1.5 minutes
+            
+            // Occasionally show math mini-game
+            setInterval(() => {
+                if (Math.random() < 0.2) { // 20% chance
+                    showMathGame();
+                }
+            }, 120000); // Check every 2 minutes
+        }
+        
+        // Spawn special customer
+        function spawnSpecialCustomer() {
+            // Find a special animal
+            const specialAnimal = animals.find(animal => animal.special);
+            
+            if (specialAnimal) {
+                // Create the special customer
+                const animalElement = document.createElement('img');
+                animalElement.className = 'animal-customer float-animation';
+                animalElement.src = specialAnimal.image;
+                animalElement.alt = specialAnimal.name;
+                animalElement.title = specialAnimal.name + " (Special Customer)";
+                
+                // Position randomly in the shop
+                const xPos = Math.floor(Math.random() * 70) + 10; // 10-80% of width
+                const yPos = Math.floor(Math.random() * 20) + 60; // Position in the lower area
+                
+                animalElement.style.left = `${xPos}%`;
+                animalElement.style.bottom = `${yPos}px`;
+                
+                // Add special visual effect
+                animalElement.style.filter = "drop-shadow(0 0 5px gold)";
+                
+                // Add interaction
+                animalElement.addEventListener('click', () => {
+                    showSpecialDialog(specialAnimal);
+                });
+                
+                shopScene.appendChild(animalElement);
+                
+                // Notify user
+                showNotification("A special customer has arrived!");
+                
+                // Remove after some time if not clicked
+                setTimeout(() => {
+                    if (animalElement.parentNode === shopScene) {
+                        animalElement.remove();
+                    }
+                }, 60000); // Remove after 1 minute
+            }
+        }
+        
+        // Show dialog for special customer
+        function showSpecialDialog(animal) {
+            dialogImage.src = animal.image;
+            dialogText.innerHTML = `<strong>Special Customer!</strong><br>Hello! I'm looking for something unique and I'm willing to pay extra!`;
+            
+            // Add special badge
+            const specialBadge = document.createElement('span');
+            specialBadge.className = 'special-badge';
+            specialBadge.textContent = "VIP";
+            dialogText.appendChild(specialBadge);
+            
+            dialogBox.style.display = 'block';
+            
+            // Set up accept button action
+            dialogAccept.onclick = () => {
+                createSpecialOrder(animal);
+                dialogBox.style.display = 'none';
+            };
+        }
+        
+        // Create a special order
+        function createSpecialOrder(animal) {
+            // Special orders have higher rewards
+            let order;
+            
+            if (gameState.businessPath === 'curator') {
+                const item = wholesaleCatalog[Math.floor(Math.random() * wholesaleCatalog.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: item.name,
+                    category: item.category,
+                    reward: (item.price + item.markup) * 2, // Double reward
+                    complete: false,
+                    special: true
+                };
+            } else {
+                const template = productTemplates[Math.floor(Math.random() * productTemplates.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: template.name,
+                    category: template.category,
+                    reward: template.baseCost * 3, // Triple reward
+                    complete: false,
+                    special: true
+                };
+            }
+            
+            gameState.orders.push(order);
+            updateOrdersList();
+            saveGameState();
+        }
+        
+        // Show random business tip
+        function showRandomTip() {
+            const tip = gameState.tips[Math.floor(Math.random() * gameState.tips.length)];
+            
+            // Create tip element
+            const tipBox = document.createElement('div');
+            tipBox.className = 'tip-box';
+            tipBox.innerHTML = `
+                <div class="tip-title">Benjamin's Tip:</div>
+                <p>${tip}</p>
+            `;
+            
+            // Add to screen content
+            screenContent.prepend(tipBox);
+            
+            // Remove after some time
+            setTimeout(() => {
+                tipBox.style.opacity = "0";
+                setTimeout(() => {
+                    if (tipBox.parentNode === screenContent) {
+                        tipBox.remove();
+                    }
+                }, 500);
+            }, 10000); // Show for 10 seconds
+        }
+        
+        // Show math mini-game
+        function showMathGame() {
+            // Only show if on the shop tab
+            if (gameState.activeTab !== 'shop') return;
+            
+            // Create math game
+            const mathGame = document.createElement('div');
+            mathGame.className = 'math-game';
+            mathGame.style.display = 'block';
+            
+            // Generate math problem - simple profit calculation
+            const cost = Math.floor(Math.random() * 20) + 5;
+            const price = cost + Math.floor(Math.random() * 15) + 5;
+            const profit = price - cost;
+            
+            // Generate options
+            const options = [
+                profit,
+                profit + Math.floor(Math.random() * 5) + 1,
+                profit - Math.floor(Math.random() * 5) + 1,
+                Math.floor(Math.random() * 15) + 5
+            ];
+            
+            // Shuffle options
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            mathGame.innerHTML = `
+                <h4>Quick Math Challenge!</h4>
+                <p>If an item costs ${cost} coins to buy and you sell it for ${price} coins, what's your profit?</p>
+                <div class="math-question">${price} - ${cost} = ?</div>
+                <div class="math-options">
+                    ${options.map(option => `<div class="math-option" data-value="${option}">${option}</div>`).join('')}
+                </div>
+            `;
+            
+            // Add to content area
+            screenContent.appendChild(mathGame);
+            
+            // Add event listeners to options
+            const mathOptions = mathGame.querySelectorAll('.math-option');
+            mathOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const selectedValue = parseInt(option.dataset.value);
+                    
+                    if (selectedValue === profit) {
+                        // Correct answer
+                        showNotification("Correct! You earned 5 bonus coins!");
+                        gameState.coins += 5;
+                        updateCoins();
+                        saveGameState();
+                        
+                        // Show Benjamin's celebration
+                        catEmotion.textContent = "🎉";
+                        catEmotion.classList.add('show');
+                        setTimeout(() => {
+                            catEmotion.classList.remove('show');
+                        }, 2000);
+                    } else {
+                        // Incorrect answer
+                        showNotification("Not quite! The correct answer is " + profit);
+                        
+                        // Show Benjamin's reaction
+                        catEmotion.textContent = "🤔";
+                        catEmotion.classList.add('show');
+                        setTimeout(() => {
+                            catEmotion.classList.remove('show');
+                        }, 2000);
+                    }
+                    
+                    // Remove math game
+                    mathGame.style.opacity = "0";
+                    setTimeout(() => {
+                        if (mathGame.parentNode === screenContent) {
+                            mathGame.remove();
+                        }
+                    }, 500);
+                });
+            });
+            
+            // Remove after some time if not answered
+            setTimeout(() => {
+                if (mathGame.parentNode === screenContent) {
+                    mathGame.style.opacity = "0";
+                    setTimeout(() => {
+                        mathGame.remove();
+                    }, 500);
+                }
+            }, 20000); // Show for 20 seconds
+        }
+        
+        // Spawn animals in the shop scene
+        function spawnAnimals() {
+            // Filter out special animals for regular spawning
+            const regularAnimals = animals.filter(animal => !animal.special);
+            
+            regularAnimals.forEach(animal => {
+                const animalElement = document.createElement('img');
+                animalElement.className = 'animal-customer float-animation';
+                animalElement.src = animal.image;
+                animalElement.alt = animal.name;
+                animalElement.title = animal.name;
+                
+                // Position the animal
+                animalElement.style.left = animal.x + '%';
+                animalElement.style.bottom = animal.y + 'px';
+                
+                // Add interaction
+                animalElement.addEventListener('click', () => {
+                    showDialog(animal);
+                });
+                
+                shopScene.appendChild(animalElement);
+            });
+        }
+        
+        // Show dialog when clicking on an animal
+        function showDialog(animal) {
+            dialogImage.src = animal.image;
+            
+            // Randomize request type based on business path
+            if (gameState.businessPath === 'curator') {
+                // Request a curated item
+                const randomItem = wholesaleCatalog[Math.floor(Math.random() * wholesaleCatalog.length)];
+                dialogText.textContent = `Hi there! I've been looking for a ${randomItem.name}. Do you have something like that in your shop?`;
+            } else {
+                // Request a custom design
+                const randomTemplate = productTemplates[Math.floor(Math.random() * productTemplates.length)];
+                dialogText.textContent = `Hello! I'd love a custom designed ${randomTemplate.name} with your unique artwork. Can you make one for me?`;
+            }
+            
+            dialogBox.style.display = 'block';
+            
+            // Set up accept button action
+            dialogAccept.onclick = () => {
+                createOrder(animal);
+                dialogBox.style.display = 'none';
+            };
+        }
+        
+        // Create a customer order
+        function createOrder(animal) {
+            // Different order types based on business path
+            let order;
+            
+            if (gameState.businessPath === 'curator') {
+                const item = wholesaleCatalog[Math.floor(Math.random() * wholesaleCatalog.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: item.name,
+                    category: item.category,
+                    reward: item.price + item.markup,
+                    complete: false,
+                    timeCreated: Date.now(),
+                    timeLimit: 120000 // 2 minutes
+                };
+            } else {
+                const template = productTemplates[Math.floor(Math.random() * productTemplates.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: template.name,
+                    category: template.category,
+                    reward: template.baseCost * 2,
+                    complete: false,
+                    timeCreated: Date.now(),
+                    timeLimit: 120000 // 2 minutes
+                };
+            }
+            
+            gameState.orders.push(order);
+            updateOrdersList();
+            saveGameState();
+        }
+        
+        // Update the orders list
+        function updateOrdersList() {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '';
+            
+            gameState.orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                if (order.complete) {
+                    orderCard.style.opacity = '0.6';
+                }
+                
+                let specialBadge = '';
+                if (order.special) {
+                    specialBadge = '<span class="special-badge">VIP</span>';
+                }
+                
+                orderCard.innerHTML = `
+                    <div class="order-top">
+                        <img src="${order.customerImage}" class="order-avatar" alt="${order.customer}">
+                        <div class="order-details">
+                            <strong>${order.customer} ${specialBadge}</strong>
+                            <div>Wants: ${order.item}</div>
+                            <div>Reward: ${order.reward} coins</div>
+                            ${order.complete ? '<div><em>Completed!</em></div>' : ''}
+                        </div>
+                    </div>
+                    ${!order.complete ? `
+                        <div class="order-timer">
+                            <div class="timer-progress" style="width: 100%"></div>
+                        </div>
+                    ` : ''}
+                    <div class="order-items">
+                        <div class="order-item"></div>
+                    </div>
+                `;
+                
+                // Add click handler to complete order if player has the item
+                if (!order.complete) {
+                    orderCard.addEventListener('click', () => {
+                        const hasItem = checkInventoryForOrder(order);
+                        if (hasItem) {
+                            completeOrder(order);
+                        } else {
+                            showNotification(`You don't have a ${order.item} in your inventory yet!`);
+                        }
+                    });
+                    
+                    // Start order timer
+                    startOrderTimer(order, orderCard.querySelector('.timer-progress'));
+                }
+                
+                ordersList.appendChild(orderCard);
+            });
+        }
+        
+        // Start order timer
+        function startOrderTimer(order, timerElement) {
+            const totalTime = order.timeLimit;
+            const timeElapsed = Date.now() - order.timeCreated;
+            const timeRemaining = Math.max(0, totalTime - timeElapsed);
+            
+            // Set initial width
+            const percentRemaining = (timeRemaining / totalTime) * 100;
+            timerElement.style.width = percentRemaining + '%';
+            
+            // Only start timer if order is not complete and time remaining
+            if (!order.complete && timeRemaining > 0) {
+                const timer = setInterval(() => {
+                    const newTimeElapsed = Date.now() - order.timeCreated;
+                    const newTimeRemaining = Math.max(0, totalTime - newTimeElapsed);
+                    const newPercentRemaining = (newTimeRemaining / totalTime) * 100;
+                    
+                    // Update width
+                    timerElement.style.width = newPercentRemaining + '%';
+                    
+                    // Change color as time runs low
+                    if (newPercentRemaining < 30) {
+                        timerElement.style.backgroundColor = '#f08080';
+                    } else if (newPercentRemaining < 60) {
+                        timerElement.style.backgroundColor = '#ffdb94';
+                    }
+                    
+                    // Check if time is up
+                    if (newTimeRemaining <= 0 || order.complete) {
+                        clearInterval(timer);
+                        
+                        if (!order.complete) {
+                            // Order expired
+                            cancelOrder(order);
+                        }
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Cancel expired order
+        function cancelOrder(order) {
+            // Find the order in the state
+            const orderIndex = gameState.orders.findIndex(o => o.id === order.id);
+            if (orderIndex === -1) return;
+            
+            // Remove the order
+            gameState.orders.splice(orderIndex, 1);
+            
+            // Decrease popularity
+            if (gameState.popularity > 1) {
+                gameState.popularity--;
+            }
+            
+            // Update the UI
+            updateOrdersList();
+            
+            // Show notification
+            showNotification(`The order from ${order.customer} has expired!`);
+            
+            // Show Benjamin's reaction
+            catEmotion.textContent = "😿";
+            catEmotion.classList.add('show');
+            setTimeout(() => {
+                catEmotion.classList.remove('show');
+            }, 2000);
+            
+            saveGameState();
+        }
+        
+        // Check if the player's inventory has what's needed for an order
+        function checkInventoryForOrder(order) {
+            // Simple version: just check if we have an item with the same name
+            return gameState.inventory.some(item => 
+                item.name.toLowerCase().includes(order.item.toLowerCase())
+            );
+        }
+        
+        // Complete an order
+        function completeOrder(order) {
+            // Find the order in the state
+            const orderIndex = gameState.orders.findIndex(o => o.id === order.id);
+            if (orderIndex === -1) return;
+            
+            // Mark as complete
+            gameState.orders[orderIndex].complete = true;
+            
+            // Add coins
+            gameState.coins += order.reward;
+            updateCoins();
+            
+            // Update daily goal progress
+            gameState.currentProgress += order.reward;
+            updateGoalProgress();
+            
+            // Remove the item from inventory
+            const itemIndex = gameState.inventory.findIndex(item => 
+                item.name.toLowerCase().includes(order.item.toLowerCase())
+            );
+            
+            if (itemIndex !== -1) {
+                gameState.inventory.splice(itemIndex, 1);
+            }
+            
+            // Increase popularity if completed quickly
+            const timeTaken = Date.now() - order.timeCreated;
+            if (timeTaken < (order.timeLimit / 2)) {
+                if (gameState.popularity < 5) {
+                    gameState.popularity++;
+                }
+            }
+            
+            // Show notification
+            showNotification(`Order completed! You earned ${order.reward} coins!`);
+            
+            // Show Benjamin's celebration
+            catEmotion.textContent = "🎉";
+            catEmotion.classList.add('show');
+            shopCat.classList.add('celebrate-animation');
+            setTimeout(() => {
+                catEmotion.classList.remove('show');
+                shopCat.classList.remove('celebrate-animation');
+            }, 2000);
+            
+            // Update the UI
+            updateOrdersList();
+            if (gameState.activeTab === 'inventory') {
+                loadTabContent('inventory', gameState.businessPath);
+            }
+            
+            // Check if daily goal is met
+            checkDailyGoal();
+            
+            saveGameState();
+        }
+        
+        // Update daily goal progress
+        function updateGoalProgress() {
+            const percentComplete = Math.min(100, (gameState.currentProgress / gameState.dailyGoal) * 100);
+            goalBar.style.width = percentComplete + '%';
+        }
+        
+        // Check if daily goal is met
+        function checkDailyGoal() {
+            if (gameState.currentProgress >= gameState.dailyGoal && goalBar.style.width !== '100%') {
+                // Goal reached
+                showNotification("Daily goal reached! Benjamin is proud of you!");
+                
+                // Add bonus coins
+                const bonus = Math.floor(gameState.dailyGoal * 0.1); // 10% bonus
+                gameState.coins += bonus;
+                updateCoins();
+                
+                // Update goal bar
+                goalBar.style.width = '100%';
+                
+                // Celebrate
+                catEmotion.textContent = "🥳";
+                catEmotion.classList.add('show');
+                shopCat.classList.add('celebrate-animation');
+                setTimeout(() => {
+                    catEmotion.classList.remove('show');
+                    shopCat.classList.remove('celebrate-animation');
+                }, 2000);
+                
+                saveGameState();
+            }
+        }
+        
+        // Update coin display
+        function updateCoins() {
+            coinCount.textContent = gameState.coins;
+        }
+        
+        // Load tab content based on tab and business path
+        function loadTabContent(tab, businessPath) {
+            // Clear current content
+            contentArea.innerHTML = '';
+            
+            // Load the appropriate content
+            switch (tab) {
+                case 'shop':
+                    if (businessPath === 'curator') {
+                        loadCuratorShop();
+                    } else {
+                        loadCreatorStudio();
+                    }
+                    break;
+                    
+                case 'inventory':
+                    loadInventory();
+                    break;
+                    
+                case 'customize':
+                    loadCustomization();
+                    break;
+            }
+        }
+        
+        // Load curator shop (wholesale catalog)
+        function loadCuratorShop() {
+            const shopContent = document.createElement('div');
+            shopContent.innerHTML = `
+                <h3>Wholesale Catalog</h3>
+                <p>Buy products to resell in your shop! Your markup is automatically added.</p>
+                
+                <div class="forecast-panel">
+                    <h4>Market Forecast</h4>
+                    <p>Items trending today:</p>
+                    <div class="forecast-chart" id="forecastChart"></div>
+                </div>
+                
+                <div class="catalog-grid"></div>
+            `;
+            
+            contentArea.appendChild(shopContent);
+            
+            // Generate forecast data
+            generateForecast();
+            
+            const catalogGrid = document.querySelector('.catalog-grid');
+            
+            // Add catalog items
+            wholesaleCatalog.forEach(item => {
+                const profitPercent = Math.round((item.markup / item.price) * 100);
+                
+                const catalogItem = document.createElement('div');
+                catalogItem.className = 'catalog-item';
+                
+                catalogItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="catalog-item-info">
+                        <h4>${item.name}</h4>
+                        <div>${item.category}</div>
+                        <div class="catalog-item-price">
+                            <span>Wholesale:</span>
+                            <span>${item.price} coins</span>
+                        </div>
+                        <div class="catalog-item-price">
+                            <span>Your Price:</span>
+                            <span>${item.price + item.markup} coins</span>
+                        </div>
+                        <div class="profit-indicator">Profit Margin: ${profitPercent}%</div>
+                    </div>
+                `;
+                
+                // Add click handler to purchase
+                catalogItem.addEventListener('click', () => {
+                    if (gameState.coins >= item.price) {
+                        purchaseWholesaleItem(item);
+                    } else {
+                        showNotification("You don't have enough coins!");
+                    }
+                });
+                
+                catalogGrid.appendChild(catalogItem);
+            });
+            
+            // Generate forecast visualization
+            function generateForecast() {
+                const forecastChart = document.getElementById('forecastChart');
+                forecastChart.innerHTML = '';
+                
+                // Generate random popularity for each category
+                const categories = [...new Set(wholesaleCatalog.map(item => item.category))];
+                const forecasts = [];
+                
+                categories.forEach((category, index) => {
+                    const popularity = Math.floor(Math.random() * 100);
+                    forecasts.push({ category, popularity });
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'forecast-bar';
+                    bar.style.height = popularity + '%';
+                    bar.style.left = (index * (100 / categories.length)) + '%';
+                    bar.style.width = ((100 / categories.length) - 5) + '%';
+                    bar.title = `${category}: ${popularity}% popularity`;
+                    
+                    forecastChart.appendChild(bar);
+                });
+                
+                // Sort

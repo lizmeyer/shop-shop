@@ -2645,4 +2645,969 @@
                     forecastChart.appendChild(bar);
                 });
                 
-                // Sort
+                // Sort by popularity and show trending items
+                forecasts.sort((a, b) => b.popularity - a.popularity);
+                const trendingCategory = forecasts[0].category;
+                
+                // Add trending note
+                const trendingNote = document.createElement('p');
+                trendingNote.innerHTML = `<strong>${trendingCategory}</strong> items are trending today! Consider stocking up.`;
+                forecastChart.parentElement.insertBefore(trendingNote, forecastChart.nextSibling);
+                
+                // Add tip
+                const tip = document.createElement('div');
+                tip.className = 'tip-box';
+                tip.innerHTML = `
+                    <div class="tip-title">Market Tip:</div>
+                    <p>Trending items sell faster and can be marked up higher!</p>
+                `;
+                forecastChart.parentElement.appendChild(tip);
+            }
+        }
+        
+        // Purchase a wholesale item
+        function purchaseWholesaleItem(item) {
+            if (gameState.coins < item.price) {
+                showNotification("You don't have enough coins!");
+                return;
+            }
+            
+            // Deduct cost
+            gameState.coins -= item.price;
+            updateCoins();
+            
+            // Add to inventory
+            const inventoryItem = {
+                id: Date.now(),
+                name: item.name,
+                category: item.category,
+                cost: item.price,
+                price: item.price + item.markup,
+                image: item.image,
+                type: 'curated',
+                dateAdded: Date.now()
+            };
+            
+            gameState.inventory.push(inventoryItem);
+            gameState.curatedProducts.push(inventoryItem);
+            
+            // Fill a shelf item
+            fillShelfItem();
+            
+            // Show notification
+            showNotification(`You purchased ${item.name} for ${item.price} coins!`);
+            
+            // Show Benjamin's reaction
+            catEmotion.textContent = "😄";
+            catEmotion.classList.add('show');
+            setTimeout(() => {
+                catEmotion.classList.remove('show');
+            }, 2000);
+            
+            // Check if this completes any orders
+            checkOrders();
+            
+            saveGameState();
+        }
+        
+        // Fill a shelf item to visualize inventory
+        function fillShelfItem() {
+            const emptyShelfItems = document.querySelectorAll('.shelf-item:not(.filled)');
+            
+            if (emptyShelfItems.length > 0) {
+                // Fill a random empty shelf slot
+                const randomIndex = Math.floor(Math.random() * emptyShelfItems.length);
+                emptyShelfItems[randomIndex].classList.add('filled');
+                
+                // Add a small animation
+                emptyShelfItems[randomIndex].style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    emptyShelfItems[randomIndex].style.transform = 'scale(1.05)';
+                }, 300);
+            } else {
+                // Find an empty display item instead
+                const emptyDisplayItems = document.querySelectorAll('.display-item:not(.filled)');
+                
+                if (emptyDisplayItems.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * emptyDisplayItems.length);
+                    emptyDisplayItems[randomIndex].classList.add('filled');
+                    
+                    // Add a small animation
+                    emptyDisplayItems[randomIndex].style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        emptyDisplayItems[randomIndex].style.transform = 'scale(1.05)';
+                    }, 300);
+                }
+            }
+        }
+        
+        // Load creator studio
+        function loadCreatorStudio() {
+            const studioContent = document.createElement('div');
+            studioContent.innerHTML = `
+                <h3>Design Studio</h3>
+                <p>Create your own designs for products!</p>
+                
+                <div class="templates-panel" id="templatesPanel">
+                    <h4>Starter Templates</h4>
+                    <div class="templates-grid">
+                        ${drawingTemplates.map(template => `
+                            <div class="template" data-name="${template.name}">
+                                <img src="${template.image}" alt="${template.name}">
+                                <div>${template.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <div class="canvas-header">
+                        <span>New Design</span>
+                        <select id="designName" style="border: 1px solid var(--pastel-pink); padding: 4px; border-radius: 4px; font-family: 'Quicksand', sans-serif;">
+                            <option>Cute Animals</option>
+                            <option>Pixel Plants</option>
+                            <option>Geometric</option>
+                            <option>Space Theme</option>
+                            <option>Custom Design</option>
+                        </select>
+                    </div>
+                    
+                    <div class="drawing-canvas" id="drawingCanvas">
+                        <!-- Pixel grid will be generated here -->
+                    </div>
+                    
+                    <div class="color-grid" id="colorGrid"></div>
+                    
+                    <div class="drawing-tools">
+                        <button class="templates-btn" id="templatesBtn">Use Template</button>
+                        <button class="clear-btn" id="clearCanvas">Clear Canvas</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Apply Design To:</h4>
+                    <div class="template-selector" id="templateSelector"></div>
+                </div>
+                
+                <div class="mockup-preview">
+                    <h4>Preview</h4>
+                    <div class="mockup-image">
+                        <img src="images/tshirt.png" alt="Product mockup" id="mockupImage">
+                        <div class="mockup-design" id="mockupDesign"></div>
+                    </div>
+                    
+                    <button class="save-button accent-button" id="saveDesign">Create Product (10 coins)</button>
+                </div>
+                
+                <div class="tip-box">
+                    <div class="tip-title">Design Tip:</div>
+                    <p>Custom designs can be sold for higher prices than wholesale items!</p>
+                </div>
+            `;
+            
+            contentArea.appendChild(studioContent);
+            
+            // Generate pixel canvas
+            generatePixelCanvas();
+            
+            // Set up color grid
+            const colorGrid = document.getElementById('colorGrid');
+            
+            pixelColors.forEach((color, index) => {
+                const colorCell = document.createElement('div');
+                colorCell.className = 'color-cell';
+                colorCell.style.backgroundColor = color;
+                
+                if (index === 0) {
+                    colorCell.classList.add('active');
+                }
+                
+                colorCell.addEventListener('click', () => {
+                    document.querySelectorAll('.color-cell').forEach(c => c.classList.remove('active'));
+                    colorCell.classList.add('active');
+                    
+                    // Update selected color
+                    document.getElementById('mockupDesign').style.backgroundColor = color;
+                });
+                
+                colorGrid.appendChild(colorCell);
+            });
+            
+            // Set up product templates
+            const templateSelector = document.getElementById('templateSelector');
+            
+            productTemplates.forEach(template => {
+                const templateElem = document.createElement('div');
+                templateElem.className = 'product-template';
+                templateElem.dataset.id = template.id;
+                
+                templateElem.innerHTML = `
+                    <img src="${template.image}" alt="${template.name}">
+                    <div>${template.name}</div>
+                    <div>${template.baseCost} coins</div>
+                `;
+                
+                templateElem.addEventListener('click', () => {
+                    // Remove active class from all templates
+                    document.querySelectorAll('.product-template').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // Add active class to selected template
+                    templateElem.classList.add('active');
+                    
+                    // Update the mockup preview
+                    document.getElementById('mockupImage').src = template.image;
+                    
+                    // Store selected template
+                    templateSelector.dataset.selectedTemplate = template.id;
+                });
+                
+                templateSelector.appendChild(templateElem);
+            });
+            
+            // Set initial mockup design color
+            document.getElementById('mockupDesign').style.backgroundColor = pixelColors[0];
+            
+            // Set up templates button
+            document.getElementById('templatesBtn').addEventListener('click', () => {
+                const templatesPanel = document.getElementById('templatesPanel');
+                templatesPanel.style.display = templatesPanel.style.display === 'none' || templatesPanel.style.display === '' ? 'block' : 'none';
+            });
+            
+            // Set up template selection
+            document.querySelectorAll('.template').forEach(template => {
+                template.addEventListener('click', () => {
+                    applyTemplate(template.dataset.name);
+                    document.getElementById('templatesPanel').style.display = 'none';
+                });
+            });
+            
+            // Set up clear button
+            document.getElementById('clearCanvas').addEventListener('click', () => {
+                clearCanvas();
+            });
+            
+            // Set up save button
+            document.getElementById('saveDesign').addEventListener('click', () => {
+                saveDesign();
+            });
+            
+            // Default select first product template
+            if (productTemplates.length > 0) {
+                templateSelector.dataset.selectedTemplate = productTemplates[0].id;
+                document.querySelector('.product-template').classList.add('active');
+            }
+        }
+        
+        // Generate pixel canvas
+        function generatePixelCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            canvas.innerHTML = '';
+            
+            // Create 16x16 pixel grid
+            for (let i = 0; i < 16 * 16; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.dataset.index = i;
+                
+                // Add drawing functionality
+                pixel.addEventListener('mousedown', (e) => {
+                    // Get selected color
+                    const activeColor = document.querySelector('.color-cell.active').style.backgroundColor;
+                    
+                    // Paint pixel
+                    pixel.style.backgroundColor = activeColor;
+                    
+                    // Save to canvas state
+                    const row = Math.floor(i / 16);
+                    const col = i % 16;
+                    gameState.currentCanvas[row] = gameState.currentCanvas[row] || [];
+                    gameState.currentCanvas[row][col] = activeColor;
+                    
+                    // Update mockup
+                    updateMockupDesign();
+                });
+                
+                // Allow drag drawing
+                pixel.addEventListener('mouseover', (e) => {
+                    if (e.buttons === 1) {
+                        // Get selected color
+                        const activeColor = document.querySelector('.color-cell.active').style.backgroundColor;
+                        
+                        // Paint pixel
+                        pixel.style.backgroundColor = activeColor;
+                        
+                        // Save to canvas state
+                        const row = Math.floor(i / 16);
+                        const col = i % 16;
+                        gameState.currentCanvas[row] = gameState.currentCanvas[row] || [];
+                        gameState.currentCanvas[row][col] = activeColor;
+                        
+                        // Update mockup
+                        updateMockupDesign();
+                    }
+                });
+                
+                canvas.appendChild(pixel);
+            }
+            
+            // Initialize empty canvas state
+            gameState.currentCanvas = Array(16).fill().map(() => Array(16).fill(null));
+        }
+        
+        // Update mockup design
+        function updateMockupDesign() {
+            const mockupDesign = document.getElementById('mockupDesign');
+            
+            // Create a simple representation of the design
+            let canvasHtml = '';
+            for (let row = 0; row < gameState.currentCanvas.length; row++) {
+                for (let col = 0; col < gameState.currentCanvas[row].length; col++) {
+                    if (gameState.currentCanvas[row][col]) {
+                        const size = 100 / 16; // Size as percentage of container
+                        canvasHtml += `
+                            <div style="
+                                position: absolute;
+                                top: ${row * size}%;
+                                left: ${col * size}%;
+                                width: ${size}%;
+                                height: ${size}%;
+                                background-color: ${gameState.currentCanvas[row][col]};
+                            "></div>
+                        `;
+                    }
+                }
+            }
+            
+            mockupDesign.innerHTML = canvasHtml;
+        }
+        
+        // Apply template to canvas
+        function applyTemplate(templateName) {
+            // Find template
+            const template = drawingTemplates.find(t => t.name === templateName);
+            
+            if (!template) return;
+            
+            // For simplicity, we'll just set colors based on the template name
+            // In a real implementation, you would load the template data
+            clearCanvas();
+            
+            if (templateName === 'Heart') {
+                const canvas = document.getElementById('drawingCanvas');
+                const pixels = canvas.querySelectorAll('.pixel');
+                const heartPattern = [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+                    0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+                    0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0,
+                    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                    0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+                    0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                ];
+                
+                const heartColor = '#ffb6c1'; // Light pink
+                
+                for (let i = 0; i < pixels.length; i++) {
+                    if (heartPattern[i] === 1) {
+                        pixels[i].style.backgroundColor = heartColor;
+                        
+                        // Update canvas state
+                        const row = Math.floor(i / 16);
+                        const col = i % 16;
+                        gameState.currentCanvas[row] = gameState.currentCanvas[row] || [];
+                        gameState.currentCanvas[row][col] = heartColor;
+                    }
+                }
+                
+                // Update mockup
+                updateMockupDesign();
+            } else if (templateName === 'Star') {
+                const canvas = document.getElementById('drawingCanvas');
+                const pixels = canvas.querySelectorAll('.pixel');
+                const starPattern = [
+                    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+                    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                    0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+                    0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+                    0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
+                    0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0,
+                    0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0,
+                    1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                ];
+                
+                const starColor = '#ffdb94'; // Warm yellow
+                
+                for (let i = 0; i < pixels.length; i++) {
+                    if (starPattern[i] === 1) {
+                        pixels[i].style.backgroundColor = starColor;
+                        
+                        // Update canvas state
+                        const row = Math.floor(i / 16);
+                        const col = i % 16;
+                        gameState.currentCanvas[row] = gameState.currentCanvas[row] || [];
+                        gameState.currentCanvas[row][col] = starColor;
+                    }
+                }
+                
+                // Update mockup
+                updateMockupDesign();
+            } else if (templateName === 'Flower') {
+                const canvas = document.getElementById('drawingCanvas');
+                const pixels = canvas.querySelectorAll('.pixel');
+                const flowerPattern = [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+                    0, 0, 0, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 0, 0, 0,
+                    0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0,
+                    0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
+                    0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0,
+                    0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0,
+                    0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 0,
+                    0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                ];
+                
+                const colors = {
+                    1: '#ffb6c1', // Pink petals
+                    2: '#ffdb94', // Yellow center
+                    3: '#95d5b2'  // Green stem
+                };
+                
+                for (let i = 0; i < pixels.length; i++) {
+                    if (flowerPattern[i] !== 0) {
+                        const colorCode = flowerPattern[i];
+                        pixels[i].style.backgroundColor = colors[colorCode];
+                        
+                        // Update canvas state
+                        const row = Math.floor(i / 16);
+                        const col = i % 16;
+                        gameState.currentCanvas[row] = gameState.currentCanvas[row] || [];
+                        gameState.currentCanvas[row][col] = colors[colorCode];
+                    }
+                }
+                
+                // Update mockup
+                updateMockupDesign();
+            }
+            
+            // Show notification
+            showNotification("Template applied! Customize it with your colors!");
+        }
+        
+        // Clear canvas
+        function clearCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            const pixels = canvas.querySelectorAll('.pixel');
+            
+            pixels.forEach(pixel => {
+                pixel.style.backgroundColor = '';
+            });
+            
+            // Reset canvas state
+            gameState.currentCanvas = Array(16).fill().map(() => Array(16).fill(null));
+            
+            // Update mockup
+            updateMockupDesign();
+        }
+        
+        // Save a created design
+        function saveDesign() {
+            const designCost = 10; // Base cost to create a design
+            
+            if (gameState.coins < designCost) {
+                showNotification("You don't have enough coins to create this product!");
+                return;
+            }
+            
+            // Get selected template
+            const templateSelector = document.getElementById('templateSelector');
+            const selectedTemplateId = templateSelector.dataset.selectedTemplate;
+            
+            if (!selectedTemplateId) {
+                showNotification("Please select a product template first!");
+                return;
+            }
+            
+            const template = productTemplates.find(t => t.id.toString() === selectedTemplateId);
+            
+            // Get design name and color
+            const designName = document.getElementById('designName').value;
+            const designColor = document.querySelector('.color-cell.active').style.backgroundColor;
+            
+            // Check if canvas has any design
+            let hasDesign = false;
+            for (let row = 0; row < gameState.currentCanvas.length; row++) {
+                for (let col = 0; col < gameState.currentCanvas[row].length; col++) {
+                    if (gameState.currentCanvas[row][col]) {
+                        hasDesign = true;
+                        break;
+                    }
+                }
+                if (hasDesign) break;
+            }
+            
+            if (!hasDesign) {
+                showNotification("Please draw something first!");
+                return;
+            }
+            
+            // Create the product
+            const product = {
+                id: Date.now(),
+                name: `${designName} ${template.name}`,
+                category: template.category,
+                cost: designCost,
+                price: template.baseCost * 2, // Simplified pricing
+                image: template.image,
+                designColor: designColor,
+                type: 'created',
+                design: JSON.parse(JSON.stringify(gameState.currentCanvas)),
+                dateAdded: Date.now()
+            };
+            
+            // Deduct cost
+            gameState.coins -= designCost;
+            updateCoins();
+            
+            // Add to inventory
+            gameState.inventory.push(product);
+            gameState.createdDesigns.push(product);
+            
+            // Fill a shelf item
+            fillShelfItem();
+            
+            // Show notification
+            showNotification(`You created a ${product.name} for ${designCost} coins!`);
+            
+            // Show Benjamin's celebration
+            catEmotion.textContent = "🎨";
+            catEmotion.classList.add('show');
+            shopCat.classList.add('celebrate-animation');
+            setTimeout(() => {
+                catEmotion.classList.remove('show');
+                shopCat.classList.remove('celebrate-animation');
+            }, 2000);
+            
+            // Save design to saved designs
+            const savedDesign = {
+                name: designName,
+                canvas: JSON.parse(JSON.stringify(gameState.currentCanvas)),
+                timestamp: Date.now()
+            };
+            gameState.savedDesigns.push(savedDesign);
+            
+            // Check if this completes any orders
+            checkOrders();
+            
+            // Clear canvas for next design
+            clearCanvas();
+            
+            saveGameState();
+        }
+        
+        // Load inventory
+        function loadInventory() {
+            const inventoryContent = document.createElement('div');
+            inventoryContent.innerHTML = `
+                <h3>Your Inventory</h3>
+                <p>Items you've added to your shop. Currently: ${gameState.inventory.length} items</p>
+                <div class="inventory-grid" id="inventoryGrid"></div>
+            `;
+            
+            contentArea.appendChild(inventoryContent);
+            
+            const inventoryGrid = document.getElementById('inventoryGrid');
+            
+            // Show inventory items
+            if (gameState.inventory.length === 0) {
+                inventoryGrid.innerHTML = '<p>Your inventory is empty. Add items from the Shop tab!</p>';
+            } else {
+                gameState.inventory.forEach(item => {
+                    // Calculate profit margin
+                    const profit = item.price - item.cost;
+                    const profitPercent = Math.round((profit / item.cost) * 100);
+                    
+                    // Format date added
+                    const dateAdded = new Date(item.dateAdded);
+                    const dateString = dateAdded.toLocaleDateString();
+                    
+                    const inventoryItem = document.createElement('div');
+                    inventoryItem.className = 'inventory-item';
+                    
+                    inventoryItem.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="inventory-details">
+                            <h4>${item.name}</h4>
+                            <div>${item.category}</div>
+                            <div>Price: ${item.price} coins</div>
+                            <div class="profit-indicator">Profit: ${profit} coins (${profitPercent}%)</div>
+                            <small>Added: ${dateString}</small>
+                        </div>
+                        <div class="inventory-actions">
+                            <button class="inventory-btn display-btn" data-id="${item.id}">Display</button>
+                            <button class="inventory-btn adjust-btn" data-id="${item.id}">Adjust Price</button>
+                        </div>
+                    `;
+                    
+                    // Add event listeners for buttons
+                    inventoryGrid.appendChild(inventoryItem);
+                });
+                
+                // Add event listeners for buttons after adding to DOM
+                document.querySelectorAll('.display-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const itemId = e.target.dataset.id;
+                        displayItem(itemId);
+                    });
+                });
+                
+                document.querySelectorAll('.adjust-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const itemId = e.target.dataset.id;
+                        adjustItemPrice(itemId);
+                    });
+                });
+            }
+        }
+        
+        // Display item in shop
+        function displayItem(itemId) {
+            const item = gameState.inventory.find(i => i.id.toString() === itemId);
+            
+            if (item) {
+                // Find an empty display slot
+                const emptyDisplayItems = document.querySelectorAll('.display-item:not(.filled)');
+                
+                if (emptyDisplayItems.length > 0) {
+                    // Fill the first empty display slot
+                    emptyDisplayItems[0].classList.add('filled');
+                    emptyDisplayItems[0].style.backgroundColor = item.type === 'created' ? item.designColor : '';
+                    
+                    // Add a small animation
+                    emptyDisplayItems[0].style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        emptyDisplayItems[0].style.transform = 'scale(1.05)';
+                    }, 300);
+                    
+                    showNotification(`${item.name} is now on display!`);
+                } else {
+                    showNotification("All display slots are full! Make some sales first.");
+                }
+            }
+        }
+        
+        // Adjust item price
+        function adjustItemPrice(itemId) {
+            const item = gameState.inventory.find(i => i.id.toString() === itemId);
+            
+            if (item) {
+                // Create a simple price adjustment dialog
+                const adjustDialog = document.createElement('div');
+                adjustDialog.className = 'dialog-box';
+                adjustDialog.style.display = 'block';
+                adjustDialog.style.zIndex = '200';
+                
+                adjustDialog.innerHTML = `
+                    <h4>Adjust Price for ${item.name}</h4>
+                    <p>Current price: ${item.price} coins</p>
+                    <p>Cost: ${item.cost} coins</p>
+                    <p>Profit: ${item.price - item.cost} coins</p>
+                    <div style="margin: 15px 0;">
+                        <label>New price:</label>
+                        <input type="number" id="newPrice" value="${item.price}" min="${item.cost}" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid var(--pastel-pink); border-radius: 4px;">
+                    </div>
+                    <div class="dialog-buttons">
+                        <button id="cancelAdjust">Cancel</button>
+                        <button id="confirmAdjust" class="accent-button">Save</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(adjustDialog);
+                
+                // Position the dialog
+                adjustDialog.style.top = '50%';
+                adjustDialog.style.left = '50%';
+                adjustDialog.style.transform = 'translate(-50%, -50%)';
+                
+                // Add event listeners
+                document.getElementById('cancelAdjust').addEventListener('click', () => {
+                    adjustDialog.remove();
+                });
+                
+                document.getElementById('confirmAdjust').addEventListener('click', () => {
+                    const newPrice = parseInt(document.getElementById('newPrice').value);
+                    
+                    if (newPrice < item.cost) {
+                        showNotification("Price cannot be lower than cost!");
+                        return;
+                    }
+                    
+                    // Update item price
+                    item.price = newPrice;
+                    
+                    // Update UI
+                    loadTabContent('inventory', gameState.businessPath);
+                    
+                    // Show notification
+                    showNotification(`Price for ${item.name} updated to ${newPrice} coins!`);
+                    
+                    // Remove dialog
+                    adjustDialog.remove();
+                    
+                    saveGameState();
+                });
+            }
+        }
+        
+        // Load customization
+        function loadCustomization() {
+            const customizeContent = document.createElement('div');
+            customizeContent.innerHTML = `
+                <h3>Customize Your Shop</h3>
+                <p>Make ${gameState.ownerName}'s shop stand out!</p>
+                
+                <div style="background-color: var(--light-pink); padding: 15px; border: 1px solid var(--pastel-pink); border-radius: 8px; box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1); margin-bottom: 20px;">
+                    <h4>Shop Name</h4>
+                    <input type="text" id="shopNameInput" value="${gameState.shopName}" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid var(--pastel-pink); background-color: var(--cream); font-family: 'Quicksand', sans-serif; font-size: 16px; border-radius: 4px;">
+                    
+                    <h4>Shop Theme</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div class="theme-btn ${gameState.theme === 'pastel' ? 'active' : ''}" id="customPastelTheme" style="width: 30px; height: 30px; background: linear-gradient(to right, #ffd6e0, #ffb6c1); border: 1px solid var(--pastel-pink); border-radius: 4px; cursor: pointer;"></div>
+                        <div class="theme-btn ${gameState.theme === 'mint' ? 'active' : ''}" id="customMintTheme" style="width: 30px; height: 30px; background: linear-gradient(to right, #c5e8d1, #97d1aa); border: 1px solid var(--pastel-pink); border-radius: 4px; cursor: pointer;"></div>
+                        <div class="theme-btn ${gameState.theme === 'lavender' ? 'active' : ''}" id="customLavenderTheme" style="width: 30px; height: 30px; background: linear-gradient(to right, #e0d6ff, #c9b6ff); border: 1px solid var(--pastel-pink); border-radius: 4px; cursor: pointer;"></div>
+                    </div>
+                    
+                    <button id="saveShopSettings">Save Changes</button>
+                </div>
+                
+                <div style="background-color: var(--light-pink); padding: 15px; border: 1px solid var(--pastel-pink); border-radius: 8px; box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1); margin-bottom: 20px;">
+                    <h4>Shop Calendar</h4>
+                    <p>Special events and holidays:</p>
+                    
+                    <div class="calendar">
+                        <h5>May 2025</h5>
+                        <div class="calendar-grid">
+                            <div class="calendar-day">1</div>
+                            <div class="calendar-day">2</div>
+                            <div class="calendar-day">3</div>
+                            <div class="calendar-day">4</div>
+                            <div class="calendar-day">5</div>
+                            <div class="calendar-day">6</div>
+                            <div class="calendar-day">7</div>
+                            <div class="calendar-day">8</div>
+                            <div class="calendar-day">9</div>
+                            <div class="calendar-day">10</div>
+                            <div class="calendar-day">11</div>
+                            <div class="calendar-day">12</div>
+                            <div class="calendar-day event" title="Special Sale Day!">13</div>
+                            <div class="calendar-day">14</div>
+                            <div class="calendar-day">15</div>
+                            <div class="calendar-day">16</div>
+                            <div class="calendar-day">17</div>
+                            <div class="calendar-day">18</div>
+                            <div class="calendar-day event" title="New Products Available!">19</div>
+                            <div class="calendar-day">20</div>
+                            <div class="calendar-day">21</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background-color: var(--light-pink); padding: 15px; border: 1px solid var(--pastel-pink); border-radius: 8px; box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);">
+                    <h4>Shop Stats</h4>
+                    
+                    <div class="forecast-panel">
+                        <h5>Sales Forecast</h5>
+                        <div class="forecast-chart" id="salesForecast"></div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <h5>Your Top Products</h5>
+                        <ul style="padding-left: 20px;">
+                            ${getTopProducts().map(product => `
+                                <li>${product.name} - ${product.price} coins</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            contentArea.appendChild(customizeContent);
+            
+            // Generate sales forecast
+            generateSalesForecast();
+            
+            // Add event listeners for theme buttons
+            document.getElementById('customPastelTheme').addEventListener('click', () => {
+                changeTheme('pastel');
+                document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('customPastelTheme').classList.add('active');
+            });
+            
+            document.getElementById('customMintTheme').addEventListener('click', () => {
+                changeTheme('mint');
+                document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('customMintTheme').classList.add('active');
+            });
+            
+            document.getElementById('customLavenderTheme').addEventListener('click', () => {
+                changeTheme('lavender');
+                document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('customLavenderTheme').classList.add('active');
+            });
+            
+            // Save shop settings
+            document.getElementById('saveShopSettings').addEventListener('click', () => {
+                const newShopName = document.getElementById('shopNameInput').value.trim();
+                
+                if (newShopName) {
+                    gameState.shopName = newShopName;
+                    showNotification("Shop settings saved!");
+                    saveGameState();
+                } else {
+                    showNotification("Shop name cannot be empty!");
+                }
+            });
+        }
+        
+        // Generate sales forecast
+        function generateSalesForecast() {
+            const forecastChart = document.getElementById('salesForecast');
+            if (!forecastChart) return;
+            
+            forecastChart.innerHTML = '';
+            
+            // Simple forecast for next 5 days
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+            
+            days.forEach((day, index) => {
+                const forecast = Math.floor(Math.random() * 70) + 30; // 30-100
+                
+                const bar = document.createElement('div');
+                bar.className = 'forecast-bar';
+                bar.style.height = forecast + '%';
+                bar.style.left = (index * (100 / days.length)) + '%';
+                bar.style.width = ((100 / days.length) - 5) + '%';
+                bar.title = `${day}: ${forecast} expected sales`;
+                
+                forecastChart.appendChild(bar);
+                
+                // Add day label
+                const label = document.createElement('div');
+                label.style.position = 'absolute';
+                label.style.bottom = '-20px';
+                label.style.left = (index * (100 / days.length) + (100 / days.length) / 2) + '%';
+                label.style.transform = 'translateX(-50%)';
+                label.style.fontSize = '12px';
+                label.textContent = day;
+                
+                forecastChart.appendChild(label);
+            });
+        }
+        
+        // Get top products
+        function getTopProducts() {
+            // Sort by price for simplicity
+            const sortedInventory = [...gameState.inventory].sort((a, b) => b.price - a.price);
+            return sortedInventory.slice(0, 3); // Top 3 products
+        }
+        
+        // Check if any orders can be completed
+        function checkOrders() {
+            let updated = false;
+            
+            gameState.orders.forEach(order => {
+                if (!order.complete && checkInventoryForOrder(order)) {
+                    // Notify the player they can complete an order
+                    showNotification(`You now have the ${order.item} that ${order.customer} ordered!`);
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                updateOrdersList();
+            }
+        }
+        
+        // Save game state to localStorage
+        function saveGameState() {
+            try {
+                // Create a simplified version of the state to save
+                const stateToSave = {
+                    coins: gameState.coins,
+                    businessPath: gameState.businessPath,
+                    inventory: gameState.inventory,
+                    orders: gameState.orders,
+                    customerCount: gameState.customerCount,
+                    level: gameState.level,
+                    progress: gameState.progress,
+                    popularity: gameState.popularity,
+                    curatedProducts: gameState.curatedProducts,
+                    createdDesigns: gameState.createdDesigns,
+                    shopName: gameState.shopName,
+                    ownerName: gameState.ownerName,
+                    dailyGoal: gameState.dailyGoal,
+                    currentProgress: gameState.currentProgress,
+                    firstVisit: gameState.firstVisit,
+                    specialCustomerChance: gameState.specialCustomerChance,
+                    theme: gameState.theme,
+                    savedDesigns: gameState.savedDesigns,
+                    petCount: gameState.petCount
+                };
+                
+                localStorage.setItem('kittenSorbetGameState', JSON.stringify(stateToSave));
+            } catch (error) {
+                console.error('Error saving game state:', error);
+            }
+        }
+        
+        // Load game state from localStorage
+        function loadGameState() {
+            try {
+                const savedState = localStorage.getItem('kittenSorbetGameState');
+                
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    
+                    // Update game state with saved values
+                    Object.keys(parsedState).forEach(key => {
+                        gameState[key] = parsedState[key];
+                    });
+                    
+                    // Update theme
+                    applyTheme();
+                }
+            } catch (error) {
+                console.error('Error loading game state:', error);
+            }
+        }
+        
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+/* Buttons */
+button {
+    background-color: var(--pastel-yellow);
+    color: var(--text-color);
+    border: 1px solid var(--warm-yellow);
+    /* Other styles */
+}
+
+.accent-button { /* ... */ }
+.save-button { /* ... */ }
+
+/* Cards and components */
+.inventory-item { /* ... */ }
+.order-card { /* ... */ }
+/* ... other component styles ... */

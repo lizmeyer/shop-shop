@@ -1,0 +1,13 @@
+/* Mint theme */
+[data-theme="mint"] {
+    --soft-pink: #c5e8d1;
+    --light-pink: #e8f5ed;
+    /* Other variables */
+}
+
+/* Lavender theme */
+[data-theme="lavender"] {
+    --soft-pink: #e0d6ff;
+    --light-pink: #f0ecff;
+    /* Other variables */
+}

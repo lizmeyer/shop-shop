@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitten Sorbet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap');
+        
+        :root {
+            --soft-pink: #ffd6e0;
+            --light-pink: #ffecf0;
+            --pastel-pink: #ffb6c1;
+            --pastel-yellow: #fff0b5;
+            --warm-yellow: #ffdb94;
+            --soft-blue: #d6e5ff;
+            --cream: #fffaf0;
+            --light-wood: #e6c49b;
+            --wood: #d9b38c;
+            --peach: #ffb997;
+            --text-color: #6d5a50;
+            --pixel-border: 1px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--soft-pink);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            overflow: hidden;
+            font-size: 16px;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Main Game Window */
+        .game-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--light-pink);
+            position: relative;
+        }
+        
+        .shop-scene {
+            flex: 1;
+            background-color: var(--soft-blue);
+            background-image: url('/api/placeholder/800/500');
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+            border-bottom: var(--pixel-border) solid var(--pastel-pink);
+            image-rendering: pixelated;
+        }
+        
+        .shop-counter {
+            position: absolute;
+            bottom: 10%;
+            left: 10%;
+            width: 80%;
+            height: 20%;
+            background-color: var(--wood);
+            border: var(--pixel-border) solid var(--light-wood);
+            border-bottom: 4px solid var(--light-wood);
+            border-radius: 4px;
+        }
+        
+        .shop-shelves {
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            width: 90%;
+            height: 50%;
+            background-color: var(--light-wood);
+            border: var(--pixel-border) solid var(--wood);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            border-radius: 4px;
+        }
+        
+        .shelf-row {
+            flex: 1;
+            background-color: var(--wood);
+            display: flex;
+            padding: 5px;
+            gap: 10px;
+            border-radius: 2px;
+        }
+        
+        .shelf-item {
+            width: 40px;
+            height: 40px;
+            background-color: var(--cream);
+            border: 1px solid var(--text-color);
+            border-radius: 2px;
+        }
+        
+        .shop-cat {
+            position: absolute;
+            bottom: 25%;
+            left: 45%;
+            width: 100px;
+            height: 100px;
+            background-image: url('/api/placeholder/100/100');
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+        }
+        
+        .shop-display {
+            position: absolute;
+            bottom: 30%;
+            left: 20%;
+            width: 60%;
+            height: 20%;
+            background-color: var(--cream);
+            border: var(--pixel-border) solid var(--wood);
+            display: flex;
+            padding: 5px;
+            gap: 5px;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .display-item {
+            flex: 1;
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            border-radius: 3px;
+        }
+        
+        .computer-screen {
+            position: absolute;
+            width: 35%;
+            height: 45%;
+            top: 15%;
+            right: 10%;
+            background-color: var(--cream);
+            border: 2px solid var(--pastel-pink);
+            box-shadow: 0 0 5px rgba(109, 90, 80, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        
+        .screen-header {
+            background-color: var(--pastel-pink);
+            color: var(--cream);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            border-bottom: 1px solid var(--soft-pink);
+        }
+        
+        .screen-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: var(--light-pink);
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            height: 160px;
+            background-color: var(--wood);
+            display: flex;
+            padding: 10px;
+            gap: 12px;
+        }
+        
+        .dashboard-panel {
+            flex: 1;
+            background-color: var(--cream);
+            border: var(--pixel-border) solid var(--pastel-pink);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .dashboard-panel h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-color);
+            text-align: center;
+            border-bottom: 1px solid var(--pastel-pink);
+            padding-bottom: 6px;
+            font-weight: 600;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background-color: var(--pastel-yellow);
+            display: flex;
+            flex-direction: column;
+            border-left: var(--pixel-border) solid var(--warm-yellow);
+        }
+        
+        .business-paths {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+        }
+        
+        .path-button {
+            flex: 1;
+            padding: 15px 10px;
+            border: 1px solid var(--wood);
+            background-color: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .path-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .path-button.active {
+            background-color: var(--soft-pink);
+            border-color: var(--pastel-pink);
+        }
+        
+        .path-button img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            image-rendering: pixelated;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background-color: var(--warm-yellow);
+            border-bottom: var(--pixel-border) solid var(--wood);
+            border-top: var(--pixel-border) solid var(--wood);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+            border-right: 1px solid var(--wood);
+            transition: background-color 0.2s;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab:hover {
+            background-color: var(--peach);
+        }
+        
+        .tab.active {
+            background-color: var(--soft-pink);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        /* Main content area */
+        .content-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: var(--cream);
+        }
+        
+        /* Wholesale Catalog */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .catalog-item {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .catalog-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .catalog-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+        
+        .catalog-item-info {
+            padding: 10px;
+        }
+        
+        .catalog-item-price {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+        
+        .catalog-item-price span:last-child {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        /* Creator Studio */
+        .canvas-container {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .canvas-header {
+            background-color: var(--pastel-pink);
+            color: var(--text-color);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--soft-pink);
+        }
+        
+        .drawing-canvas {
+            height: 200px;
+            border: 1px dashed var(--pastel-pink);
+            margin: 10px;
+            position: relative;
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-gap: 5px;
+            margin: 10px;
+        }
+        
+        .color-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--pastel-pink);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .color-cell.active {
+            border: 2px solid var(--text-color);
+            box-shadow: 0 0 4px rgba(109, 90, 80, 0.2);
+        }
+        
+        /* Product Templates */
+        .template-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .product-template {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            padding: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .product-template:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .product-template img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+        
+        /* Orders Panel */
+        .orders-panel {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .order-card {
+            background-color: var(--light-pink);
+            margin-bottom: 10px;
+            border: 1px solid var(--pastel-pink);
+            padding: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .order-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(109, 90, 80, 0.15);
+        }
+        
+        .order-top {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .order-avatar {
+            width: 50px;
+            height: 50px;
+            border: 1px solid var(--pastel-pink);
+            margin-right: 10px;
+            border-radius: 6px;
+        }
+        
+        .order-details {
+            flex: 1;
+        }
+        
+        .order-items {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .order-item {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--pastel-pink);
+            background-color: var(--cream);
+            border-radius: 4px;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .inventory-item {
+            background-color: var(--light-pink);
+            border: 1px solid var(--pastel-pink);
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .inventory-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+        
+        .inventory-details {
+            padding: 10px;
+            font-size: 16px;
+        }
+        
+        /* Animals in shop */
+        .animal-customer {
+            position: absolute;
+            width: 70px;
+            height: 90px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            image-rendering: pixelated;
+        }
+        
+        .animal-customer:hover {
+            transform: scale(1.1);
+        }
+        
+        .dialog-box {
+            position: absolute;
+            background-color: var(--cream);
+            border: 1px solid var(--pastel-pink);
+            padding: 15px;
+            max-width: 300px;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(109, 90, 80, 0.15);
+        }
+        
+        .dialog-box img {
+            width: 70px;
+            height: 70px;
+            border: 1px solid var(--pastel-pink);
+            float: left;
+            margin-right: 15px;
+            border-radius: 8px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        /* Buttons */
+        button {
+            background-color: var(--pastel-yellow);
+            color: var(--text-color);
+            border: 1px solid var(--warm-yellow);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            transition: background-color 0.2s, transform 0.1s;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        button:hover {
+            background-color: var(--warm-yellow);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(109, 90, 80, 0.15);
+        }
+        
+        .accent-button {
+            background-color: var(--soft-pink);
+            border-color: var(--pastel-pink);
+        }
+        
+        .accent-button:hover {
+            background-color: var(--pastel-pink);
+        }
+        
+        .save-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        /* Stats */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+        
+        .badge {
+            background-color: var(--soft-pink);
+            color: var(--text-color);
+            padding: 0px 6px;
+            border: 1px solid var(--pastel-pink);
+            font-size: 14px;
+            margin-left: 5px;
+            border-radius: 4px;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            background-color: var(--light-pink);
+            height: 8px;
+            width: 100%;
+            margin-top: 5px;
+            border: 1px solid var(--pastel-pink);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background-color: var(--pastel-pink);
+            height: 6px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Design mockups */
+        .mockup-preview {
+            background-color: var(--light-pink);
+            padding: 15px;
+            border: 1px solid var(--pastel-pink);
+            margin-top: 15px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);
+        }
+        
+        .mockup-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+            border: 1px solid var(--pastel-pink);
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .mockup-design {
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            background-color: white;
+            border: 1px dashed var(--pastel-pink);
+            border-radius: 4px;
+        }
+        
+        /* Gentle animations */
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .float-animation {
+            animation: float 3s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse-animation {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        
+        .logo {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Game View -->
+        <div class="game-view">
+            <!-- Shop Scene -->
+            <div class="shop-scene" id="shopScene">
+                <!-- Shop background elements -->
+                <div class="shop-shelves">
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                    <div class="shelf-row">
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                        <div class="shelf-item"></div>
+                    </div>
+                </div>
+                
+                <div class="shop-counter"></div>
+                <div class="shop-display">
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                    <div class="display-item"></div>
+                </div>
+                
+                <div class="shop-cat float-animation"></div>
+                
+                <!-- Computer screen in the shop -->
+                <div class="computer-screen">
+                    <div class="screen-header">
+                        <div class="logo">
+                            <span>kittensorbet.com</span>
+                        </div>
+                        <div>Coins: <span id="coinCount">100</span></div>
+                    </div>
+                    <div class="screen-body" id="screenContent">
+                        <!-- Screen content will be dynamically loaded here -->
+                        <div style="text-align: center; padding: 20px;">
+                            <h3>Welcome to Kitten Sorbet!</h3>
+                            <p>Benjamin is excited to help you start your business!</p>
+                            <p>Choose your business path and start selling!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dialog box for interactions -->
+                <div class="dialog-box" id="dialogBox">
+                    <img src="/api/placeholder/70/70" id="dialogImage" alt="Animal">
+                    <div id="dialogText">Hello! I'm looking for something special!</div>
+                    <div class="dialog-buttons">
+                        <button id="dialogClose">Ok!</button>
+                        <button id="dialogAccept" class="accent-button">I'll help!</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard -->
+            <div class="dashboard">
+                <div class="dashboard-panel stats-panel">
+                    <h3>Shop Stats</h3>
+                    <div class="stat-item">
+                        <span>Customers:</span>
+                        <span>12 <span class="badge">+3</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Popularity:</span>
+                        <span>★★★☆☆</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Level:</span>
+                        <span>2</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 45%"></div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-panel orders-panel">
+                    <h3>Current Orders</h3>
+                    <div id="ordersList">
+                        <!-- Orders will be added dynamically -->
+                        <div class="order-card">
+                            <div class="order-top">
+                                <img src="/api/placeholder/50/50" class="order-avatar" alt="Customer">
+                                <div class="order-details">
+                                    <strong>Bunny</strong>
+                                    <div>Looking for a cute t-shirt</div>
+                                    <div>Reward: 25 coins</div>
+                                </div>
+                            </div>
+                            <div class="order-items">
+                                <div class="order-item"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 style="text-align: center; margin: 15px 0; color: var(--text-color);">Kitten Sorbet</h2>
+            
+            <!-- Business Path Selection -->
+            <div class="business-paths">
+                <div class="path-button active" id="curatorPath">
+                    <img src="/api/placeholder/60/60" alt="Curator">
+                    <span>Curator</span>
+                    <small>Buy & Resell</small>
+                </div>
+                <div class="path-button" id="creatorPath">
+                    <img src="/api/placeholder/60/60" alt="Creator">
+                    <span>Creator</span>
+                    <small>Design & Sell</small>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="shop">Shop</div>
+                <div class="tab" data-tab="inventory">Inventory</div>
+                <div class="tab" data-tab="customize">Customize</div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content-area" id="contentArea">
+                <!-- Content will be loaded dynamically based on tab and business path -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            coins: 100,
+            businessPath: 'curator', // 'curator' or 'creator'
+            activeTab: 'shop',
+            inventory: [],
+            orders: [],
+            customerCount: 12,
+            level: 2,
+            progress: 45,
+            popularity: 3,
+            curatedProducts: [],
+            createdDesigns: [],
+            shopName: "Kitten Sorbet",
+            ownerName: "Benjamin"
+        };
+        
+        // DOM elements
+        const shopScene = document.getElementById('shopScene');
+        const screenContent = document.getElementById('screenContent');
+        const contentArea = document.getElementById('contentArea');
+        const coinCount = document.getElementById('coinCount');
+        const dialogBox = document.getElementById('dialogBox');
+        const dialogText = document.getElementById('dialogText');
+        const dialogImage = document.getElementById('dialogImage');
+        const dialogClose = document.getElementById('dialogClose');
+        const dialogAccept = document.getElementById('dialogAccept');
+        const curatorPath = document.getElementById('curatorPath');
+        const creatorPath = document.getElementById('creatorPath');
+        const tabs = document.querySelectorAll('.tab');
+        const shopCat = document.querySelector('.shop-cat');
+        
+        // Set Benjamin image
+        shopCat.style.backgroundImage = "url('/api/placeholder/100/100')";
+        
+        // Sample data for the shop
+        const wholesaleCatalog = [
+            { id: 1, name: 'Cute Plushie', category: 'Toys', price: 15, image: '/api/placeholder/150/120', markup: 10 },
+            { id: 2, name: 'Handmade Soap', category: 'Bath', price: 8, image: '/api/placeholder/150/120', markup: 12 },
+            { id: 3, name: 'Wooden Puzzle', category: 'Toys', price: 12, image: '/api/placeholder/150/120', markup: 8 },
+            { id: 4, name: 'Scented Candle', category: 'Home', price: 10, image: '/api/placeholder/150/120', markup: 15 },
+            { id: 5, name: 'Handmade Mug', category: 'Kitchen', price: 9, image: '/api/placeholder/150/120', markup: 11 },
+            { id: 6, name: 'Pixel Art Print', category: 'Decor', price: 7, image: '/api/placeholder/150/120', markup: 13 }
+        ];
+        
+        const productTemplates = [
+            { id: 1, name: 'T-Shirt', category: 'Clothing', baseCost: 12, image: '/api/placeholder/60/60' },
+            { id: 2, name: 'Sticker', category: 'Stationery', baseCost: 3, image: '/api/placeholder/60/60' },
+            { id: 3, name: 'Mug', category: 'Home', baseCost: 8, image: '/api/placeholder/60/60' },
+            { id: 4, name: 'Tote Bag', category: 'Bags', baseCost: 10, image: '/api/placeholder/60/60' }
+        ];
+        
+        const animals = [
+            { name: 'Bunny', image: '/api/placeholder/70/90', x: 20, y: 70 },
+            { name: 'Fox', image: '/api/placeholder/70/90', x: 70, y: 75 },
+            { name: 'Cat', image: '/api/placeholder/70/90', x: 40, y: 65 }
+        ];
+        
+        // Colors for the creator mode - pastel palette
+        const pixelColors = [
+            '#ffd6e0', '#ffecf0', '#ffb6c1', '#fff0b5', '#ffdb94', '#ffb997',
+            '#d6e5ff', '#e6c49b', '#d9b38c', '#6d5a50', '#ffffff', '#000000',
+            '#ffccd5', '#fff1e6', '#fde4cf', '#fbf8cc', '#d8f3dc', '#b7e4c7',
+            '#95d5b2', '#52b788', '#fb6f92', '#f08080', '#ffc8dd', '#ffafcc',
+            '#caffbf', '#9bf6ff', '#bdb2ff', '#ffc6ff', '#fdffb6', '#a0c4ff'
+        ];
+        
+        // Initialize the game
+        function initGame() {
+            // Set initial coins
+            updateCoins();
+            
+            // Load initial content
+            loadTabContent('shop', 'curator');
+            
+            // Add event listeners for tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active tab styling
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Load content for the selected tab
+                    const tabName = tab.dataset.tab;
+                    gameState.activeTab = tabName;
+                    loadTabContent(tabName, gameState.businessPath);
+                });
+            });
+            
+            // Add event listeners for business paths
+            curatorPath.addEventListener('click', () => {
+                curatorPath.classList.add('active');
+                creatorPath.classList.remove('active');
+                gameState.businessPath = 'curator';
+                loadTabContent(gameState.activeTab, 'curator');
+            });
+            
+            creatorPath.addEventListener('click', () => {
+                creatorPath.classList.add('active');
+                curatorPath.classList.remove('active');
+                gameState.businessPath = 'creator';
+                loadTabContent(gameState.activeTab, 'creator');
+            });
+            
+            // Dialog event listeners
+            dialogClose.addEventListener('click', () => {
+                dialogBox.style.display = 'none';
+            });
+            
+            // Spawn animals in the shop
+            spawnAnimals();
+        }
+        
+        // Spawn animals in the shop scene
+        function spawnAnimals() {
+            animals.forEach(animal => {
+                const animalElement = document.createElement('img');
+                animalElement.className = 'animal-customer float-animation';
+                animalElement.src = animal.image;
+                animalElement.alt = animal.name;
+                animalElement.title = animal.name;
+                
+                // Position the animal
+                animalElement.style.left = animal.x + '%';
+                animalElement.style.bottom = animal.y + 'px';
+                
+                // Add interaction
+                animalElement.addEventListener('click', () => {
+                    showDialog(animal);
+                });
+                
+                shopScene.appendChild(animalElement);
+            });
+        }
+        
+        // Show dialog when clicking on an animal
+        function showDialog(animal) {
+            dialogImage.src = animal.image;
+            
+            // Randomize request type based on business path
+            if (gameState.businessPath === 'curator') {
+                // Request a curated item
+                const randomItem = wholesaleCatalog[Math.floor(Math.random() * wholesaleCatalog.length)];
+                dialogText.textContent = `Hi there! I've been looking for a ${randomItem.name}. Do you have something like that in your shop?`;
+            } else {
+                // Request a custom design
+                const randomTemplate = productTemplates[Math.floor(Math.random() * productTemplates.length)];
+                dialogText.textContent = `Hello! I'd love a custom designed ${randomTemplate.name} with your unique artwork. Can you make one for me?`;
+            }
+            
+            dialogBox.style.display = 'block';
+            
+            // Set up accept button action
+            dialogAccept.onclick = () => {
+                createOrder(animal);
+                dialogBox.style.display = 'none';
+            };
+        }
+        
+        // Create a customer order
+        function createOrder(animal) {
+            // Different order types based on business path
+            let order;
+            
+            if (gameState.businessPath === 'curator') {
+                const item = wholesaleCatalog[Math.floor(Math.random() * wholesaleCatalog.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: item.name,
+                    category: item.category,
+                    reward: item.price + item.markup,
+                    complete: false
+                };
+            } else {
+                const template = productTemplates[Math.floor(Math.random() * productTemplates.length)];
+                
+                order = {
+                    id: Date.now(),
+                    customer: animal.name,
+                    customerImage: animal.image,
+                    item: template.name,
+                    category: template.category,
+                    reward: template.baseCost * 2,
+                    complete: false
+                };
+            }
+            
+            gameState.orders.push(order);
+            updateOrdersList();
+        }
+        
+        // Update the orders list
+        function updateOrdersList() {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '';
+            
+            gameState.orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                if (order.complete) {
+                    orderCard.style.opacity = '0.6';
+                }
+                
+                orderCard.innerHTML = `
+                    <div class="order-top">
+                        <img src="${order.customerImage}" class="order-avatar" alt="${order.customer}">
+                        <div class="order-details">
+                            <strong>${order.customer}</strong>
+                            <div>Wants: ${order.item}</div>
+                            <div>Reward: ${order.reward} coins</div>
+                            ${order.complete ? '<div><em>Completed!</em></div>' : ''}
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        <div class="order-item"></div>
+                    </div>
+                `;
+                
+                // Add click handler to complete order if player has the item
+                if (!order.complete) {
+                    orderCard.addEventListener('click', () => {
+                        const hasItem = checkInventoryForOrder(order);
+                        if (hasItem) {
+                            completeOrder(order);
+                        } else {
+                            alert(`You don't have a ${order.item} in your inventory yet!`);
+                        }
+                    });
+                }
+                
+                ordersList.appendChild(orderCard);
+            });
+        }
+        
+        // Check if the player's inventory has what's needed for an order
+        function checkInventoryForOrder(order) {
+            // Simple version: just check if we have an item with the same name
+            return gameState.inventory.some(item => 
+                item.name.toLowerCase().includes(order.item.toLowerCase())
+            );
+        }
+        
+        // Complete an order
+        function completeOrder(order) {
+            // Find the order in the state
+            const orderIndex = gameState.orders.findIndex(o => o.id === order.id);
+            if (orderIndex === -1) return;
+            
+            // Mark as complete
+            gameState.orders[orderIndex].complete = true;
+            
+            // Add coins
+            gameState.coins += order.reward;
+            updateCoins();
+            
+            // Remove the item from inventory
+            const itemIndex = gameState.inventory.findIndex(item => 
+                item.name.toLowerCase().includes(order.item.toLowerCase())
+            );
+            
+            if (itemIndex !== -1) {
+                gameState.inventory.splice(itemIndex, 1);
+            }
+            
+            // Update the UI
+            updateOrdersList();
+            if (gameState.activeTab === 'inventory') {
+                loadTabContent('inventory', gameState.businessPath);
+            }
+        }
+        
+        // Update coin display
+        function updateCoins() {
+            coinCount.textContent = gameState.coins;
+        }
+        
+        // Load content based on tab and business path
+        function loadTabContent(tab, businessPath) {
+            // Clear current content
+            contentArea.innerHTML = '';
+            
+            // Load the appropriate content
+            switch (tab) {
+                case 'shop':
+                    if (businessPath === 'curator') {
+                        loadCuratorShop();
+                    } else {
+                        loadCreatorStudio();
+                    }
+                    break;
+                    
+                case 'inventory':
+                    loadInventory();
+                    break;
+                    
+                case 'customize':
+                    loadCustomization();
+                    break;
+            }
+        }
+        
+        // Load curator shop (wholesale catalog)
+        function loadCuratorShop() {
+            const shopContent = document.createElement('div');
+            shopContent.innerHTML = `
+                <h3>Wholesale Catalog</h3>
+                <p>Buy products to resell in your shop! Your markup is automatically added.</p>
+                <div class="catalog-grid"></div>
+            `;
+            
+            contentArea.appendChild(shopContent);
+            
+            const catalogGrid = document.querySelector('.catalog-grid');
+            
+            // Add catalog items
+            wholesaleCatalog.forEach(item => {
+                const catalogItem = document.createElement('div');
+                catalogItem.className = 'catalog-item';
+                
+                catalogItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="catalog-item-info">
+                        <h4>${item.name}</h4>
+                        <div>${item.category}</div>
+                        <div class="catalog-item-price">
+                            <span>Wholesale:</span>
+                            <span>${item.price} coins</span>
+                        </div>
+                        <div class="catalog-item-price">
+                            <span>Your Price:</span>
+                            <span>${item.price + item.markup} coins</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click handler to purchase
+                catalogItem.addEventListener('click', () => {
+                    if (gameState.coins >= item.price) {
+                        purchaseWholesaleItem(item);
+                    } else {
+                        alert("You don't have enough coins!");
+                    }
+                });
+                
+                catalogGrid.appendChild(catalogItem);
+            });
+        }
+        
+        // Purchase a wholesale item
+        function purchaseWholesaleItem(item) {
+            if (gameState.coins < item.price) return;
+            
+            // Deduct cost
+            gameState.coins -= item.price;
+            updateCoins();
+            
+            // Add to inventory
+            const inventoryItem = {
+                id: Date.now(),
+                name: item.name,
+                category: item.category,
+                cost: item.price,
+                price: item.price + item.markup,
+                image: item.image,
+                type: 'curated'
+            };
+            
+            gameState.inventory.push(inventoryItem);
+            gameState.curatedProducts.push(inventoryItem);
+            
+            alert(`You purchased ${item.name} for ${item.price} coins! It's now in your inventory.`);
+            
+            // Check if this completes any orders
+            checkOrders();
+        }
+        
+        // Load creator studio
+        function loadCreatorStudio() {
+            const studioContent = document.createElement('div');
+            studioContent.innerHTML = `
+                <h3>Design Studio</h3>
+                <p>Create your own designs for products!</p>
+                
+                <div class="canvas-container">
+                    <div class="canvas-header">
+                        <span>New Design</span>
+                        <select id="designName" style="border: 1px solid var(--pastel-pink); padding: 4px; border-radius: 4px; font-family: 'Quicksand', sans-serif;">
+                            <option>Cute Animals</option>
+                            <option>Pixel Plants</option>
+                            <option>Geometric</option>
+                            <option>Space Theme</option>
+                        </select>
+                    </div>
+                    
+                    <div class="drawing-canvas" id="drawingCanvas">
+                        <!-- Simple canvas representation -->
+                    </div>
+                    
+                    <div class="color-grid" id="colorGrid"></div>
+                </div>
+                
+                <div>
+                    <h4>Apply Design To:</h4>
+                    <div class="template-selector" id="templateSelector"></div>
+                </div>
+                
+                <div class="mockup-preview">
+                    <h4>Preview</h4>
+                    <div class="mockup-image">
+                        <img src="/api/placeholder/200/200" alt="Product mockup" id="mockupImage">
+                        <div class="mockup-design" id="mockupDesign"></div>
+                    </div>
+                    
+                    <button class="save-button accent-button" id="saveDesign">Create Product (10 coins)</button>
+                </div>
+            `;
+            
+            contentArea.appendChild(studioContent);
+            
+            // Set up color grid
+            const colorGrid = document.getElementById('colorGrid');
+            
+            pixelColors.forEach((color, index) => {
+                const colorCell = document.createElement('div');
+                colorCell.className = 'color-cell';
+                colorCell.style.backgroundColor = color;
+                
+                if (index === 0) {
+                    colorCell.classList.add('active');
+                }
+                
+                colorCell.addEventListener('click', () => {
+                    document.querySelectorAll('.color-cell').forEach(c => c.classList.remove('active'));
+                    colorCell.classList.add('active');
+                    
+                    // Update selected color
+                    document.getElementById('mockupDesign').style.backgroundColor = color;
+                });
+                
+                colorGrid.appendChild(colorCell);
+            });
+            
+            // Set up product templates
+            const templateSelector = document.getElementById('templateSelector');
+            
+            productTemplates.forEach(template => {
+                const templateElem = document.createElement('div');
+                templateElem.className = 'product-template';
+                
+                templateElem.innerHTML = `
+                    <img src="${template.image}" alt="${template.name}">
+                    <div>${template.name}</div>
+                    <div>${template.baseCost} coins</div>
+                `;
+                
+                templateElem.addEventListener('click', () => {
+                    // Update the mockup preview
+                    document.getElementById('mockupImage').src = template.image;
+                    
+                    // Store selected template
+                    templateSelector.dataset.selectedTemplate = template.id;
+                });
+                
+                templateSelector.appendChild(templateElem);
+            });
+            
+            // Set initial mockup design color
+            document.getElementById('mockupDesign').style.backgroundColor = pixelColors[0];
+            
+            // Set up save button
+            document.getElementById('saveDesign').addEventListener('click', () => {
+                saveDesign();
+            });
+        }
+        
+        // Save a created design
+        function saveDesign() {
+            const designCost = 10; // Base cost to create a design
+            
+            if (gameState.coins < designCost) {
+                alert("You don't have enough coins to create this product!");
+                return;
+            }
+            
+            // Get selected template
+            const templateSelector = document.getElementById('templateSelector');
+            const selectedTemplateId = templateSelector.dataset.selectedTemplate;
+            
+            if (!selectedTemplateId) {
+                alert("Please select a product template first!");
+                return;
+            }
+            
+            const template = productTemplates.find(t => t.id.toString() === selectedTemplateId);
+            
+            // Get design name and color
+            const designName = document.getElementById('designName').value;
+            const designColor = document.querySelector('.color-cell.active').style.backgroundColor;
+            
+            // Create the product
+            const product = {
+                id: Date.now(),
+                name: `${designName} ${template.name}`,
+                category: template.category,
+                cost: designCost,
+                price: template.baseCost * 2, // Simplified pricing
+                image: template.image,
+                designColor: designColor,
+                type: 'created'
+            };
+            
+            // Deduct cost
+            gameState.coins -= designCost;
+            updateCoins();
+            
+            // Add to inventory
+            gameState.inventory.push(product);
+            gameState.createdDesigns.push(product);
+            
+            alert(`You created a ${product.name} for ${designCost} coins! It's now in your inventory.`);
+            
+            // Check if this completes any orders
+            checkOrders();
+        }
+        
+        // Load inventory
+        function loadInventory() {
+            const inventoryContent = document.createElement('div');
+            inventoryContent.innerHTML = `
+                <h3>Your Inventory</h3>
+                <p>Items you've added to your shop.</p>
+                <div class="inventory-grid" id="inventoryGrid"></div>
+            `;
+            
+            contentArea.appendChild(inventoryContent);
+            
+            const inventoryGrid = document.getElementById('inventoryGrid');
+            
+            // Show inventory items
+            if (gameState.inventory.length === 0) {
+                inventoryGrid.innerHTML = '<p>Your inventory is empty. Add items from the Shop tab!</p>';
+            } else {
+                gameState.inventory.forEach(item => {
+                    const inventoryItem = document.createElement('div');
+                    inventoryItem.className = 'inventory-item';
+                    
+                    inventoryItem.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="inventory-details">
+                            <h4>${item.name}</h4>
+                            <div>${item.category}</div>
+                            <div>Price: ${item.price} coins</div>
+                        </div>
+                    `;
+                    
+                    inventoryGrid.appendChild(inventoryItem);
+                });
+            }
+        }
+        
+        // Load shop customization
+        function loadCustomization() {
+            const customizeContent = document.createElement('div');
+            customizeContent.innerHTML = `
+                <h3>Customize Your Shop</h3>
+                <p>Make ${gameState.ownerName}'s shop stand out!</p>
+                
+                <div style="background-color: var(--light-pink); padding: 15px; border: 1px solid var(--pastel-pink); border-radius: 8px; box-shadow: 0 2px 4px rgba(109, 90, 80, 0.1);">
+                    <h4>Shop Name</h4>
+                    <input type="text" value="${gameState.shopName}" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid var(--pastel-pink); background-color: var(--cream); font-family: 'Quicksand', sans-serif; font-size: 16px; border-radius: 4px;">
+                    
+                    <h4>Shop Theme</h4>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="width: 30px; height: 30px; background-color: var(--soft-pink); border: 1px solid var(--pastel-pink); border-radius: 4px;"></div>
+                        <div style="width: 30px; height: 30px; background-color: var(--pastel-yellow); border: 1px solid var(--warm-yellow); border-radius: 4px;"></div>
+                        <div style="width: 30px; height: 30px; background-color: var(--peach); border: 1px solid var(--wood); border-radius: 4px;"></div>
+                    </div>
+                    
+                    <h4>Shop Banner</h4>
+                    <div style="height: 80px; background-color: var(--cream); border: 1px solid var(--pastel-pink); display: flex; justify-content: center; align-items: center; margin-bottom: 15px; font-size: 14px; border-radius: 4px;">
+                        Upload Banner Image
+                    </div>
+                    
+                    <button>Save Changes</button>
+                </div>
+            `;
+            
+            contentArea.appendChild(customizeContent);
+        }
+        
+        // Check if any orders can be completed
+        function checkOrders() {
+            let updated = false;
+            
+            gameState.orders.forEach(order => {
+                if (!order.complete && checkInventoryForOrder(order)) {
+                    // Notify the player they can complete an order
+                    alert(`You now have the ${order.item} that ${order.customer} ordered! Click their order to complete it.`);
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                updateOrdersList();
+            }
+        }
+        
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

@@ -254,6 +254,30 @@ const UI = {
         };
     },
     
+    // Add this to your UI.js file
+function addButtonFeedback() {
+  const allButtons = document.querySelectorAll('button');
+  allButtons.forEach(button => {
+    button.addEventListener('mousedown', function() {
+      this.classList.add('button-pressed');
+    });
+    
+    button.addEventListener('mouseup', function() {
+      this.classList.remove('button-pressed');
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.classList.remove('button-pressed');
+    });
+    
+    // Debug click events
+    button.addEventListener('click', function(e) {
+      console.log('Button clicked:', this.textContent || this.className);
+    });
+  });
+}
+
+// Call this function after UI initialization
     // Set up event listeners for UI interactions
     setupEventListeners() {
         // Tab navigation

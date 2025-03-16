@@ -43,6 +43,41 @@
             display: none; /* Hidden by default, shown by JS if there's an error */
         }
     </style>
+    <!-- Add to index.html head section -->
+<style>
+  /* Fallback images for missing resources */
+  .item-fallback {
+    background-color: #ffddbb;
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #664422;
+  }
+  
+  .missing-image {
+    position: relative;
+  }
+  
+  .missing-image::before {
+    content: 'Item';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0e0d0;
+    border-radius: 4px;
+    color: #664422;
+    font-size: 10px;
+  }
+</style>
 </head>
 <body>
     <!-- Add loading indicator -->

@@ -578,12 +578,12 @@ const UI = {
             }
             
             itemElement.innerHTML = `
-                <div class="item-image">
-                    <img src="${itemData.image}" alt="${itemData.name}">
-                    <div class="item-quantity">${item.quantity}</div>
-                </div>
-                <div class="item-price-tag">${item.price} coins</div>
-            `;
+            <div class="item-image">
+                <img src="${itemData.image}" alt="${itemData.name}" onerror="this.classList.add('missing-image'); this.style.display='none';">
+            <div class="item-quantity">${item.quantity}</div>
+            </div>
+            <div class="item-price-tag">${item.price} coins</div>
+        `;
             
             shopShelves.appendChild(itemElement);
             

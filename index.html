@@ -1,39 +1,138 @@
+<!-- Core HTML fixes for the shop-shop GitHub Pages site -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kitten Sorbet - A cozy shop management game">
-    <title>Kitten Sorbet - Benjamin's Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cozy Shop Game</title>
     
-    <!-- Preload critical assets -->
-    <link rel="preload" href="images/benjamin.png" as="image">
-    
-    <!-- CSS files -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- CSS file paths - Check these are correct -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Add preloading for critical assets -->
+    <link rel="preload" href="assets/images/shop/background.png" as="image">
+    
+    <!-- Add placeholder Apple touch icon -->
+    <link rel="apple-touch-icon" href="assets/images/ui/app-icon.png">
+    
+    <!-- Add a fallback style in case CSS doesn't load -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8e8e8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        #gameContainer {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        /* Basic error message styling */
+        .error-message {
+            background-color: #fff8f8;
+            border: 1px solid #ffdddd;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 5px;
+            display: none; /* Hidden by default, shown by JS if there's an error */
+        }
+    </style>
 </head>
-<body data-theme="pastel">
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <img src="images/benjamin.png" alt="Benjamin" class="loading-image">
-        <h2>Loading Kitten Sorbet...</h2>
-        <p>Benjamin is preparing the shop!</p>
+<body>
+    <!-- Add loading indicator -->
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f8e8e8; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;">
+        <h2>Loading Shop Game...</h2>
+        <div style="width: 200px; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden; margin-top: 20px;">
+            <div id="loadingBar" style="width: 0%; height: 100%; background-color: #ffb6c1; transition: width 0.3s;"></div>
+        </div>
     </div>
     
-    <!-- Main content containers (tutorial, notification, etc.) -->
-    <!-- Basic shop layout -->
+    <!-- Error message container -->
+    <div id="errorMessage" class="error-message">
+        <h3>Oops! Something went wrong.</h3>
+        <p>We couldn't load the game properly. Here's what might be happening:</p>
+        <ul id="errorDetails"></ul>
+        <button onclick="location.reload()">Try Again</button>
+    </div>
     
-    <!-- JavaScript files -->
+    <!-- Main game container -->
+    <div id="gameContainer">
+        <!-- Game content will be dynamically inserted here -->
+    </div>
+    
+    <!-- Add error detection script -->
+    <script>
+        // Simulate loading progress
+        let progress = 0;
+        const loadingBar = document.getElementById('loadingBar');
+        const loadingInterval = setInterval(() => {
+            progress += 5;
+            loadingBar.style.width = `${progress}%`;
+            if (progress >= 100) {
+                clearInterval(loadingInterval);
+                // After "loading", check if game initialized properly
+                setTimeout(checkGameInitialization, 500);
+            }
+        }, 100);
+        
+        // Check if game initialized
+        function checkGameInitialization() {
+            // Add actual checks for your game initialization here
+            const gameContainer = document.getElementById('gameContainer');
+            
+            if (gameContainer.children.length === 0) {
+                // Game didn't load properly
+                showError([
+                    "JavaScript files might not be loading correctly",
+                    "There might be an error in the JavaScript code",
+                    "Resource paths might be incorrect"
+                ]);
+            } else {
+                // Game seems to be loading, hide loading screen
+                document.getElementById('loadingScreen').style.display = 'none';
+            }
+        }
+        
+        // Show error messages
+        function showError(errors) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorDetails = document.getElementById('errorDetails');
+            errorMessage.style.display = 'block';
+            
+            // Add each error as a list item
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                errorDetails.appendChild(li);
+            });
+            
+            // Hide loading screen
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+        
+        // Check for 404 errors
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+                showError([
+                    `Failed to load resource: ${e.target.src || e.target.href}`,
+                    "Check that all file paths are correct",
+                    "Make sure all required files are uploaded to your repository"
+                ]);
+            }
+        }, true);
+    </script>
+    
+    <!-- JS files - Make sure these paths are correct -->
     <script src="js/gameState.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/shop.js"></script>
-    <script src="js/studio.js"></script>
     <script src="js/inventory.js"></script>
-    <script src="js/orders.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

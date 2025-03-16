@@ -1426,19 +1426,18 @@ const UI = {
     
     // Format popularity rating as stars
     formatPopularity(popularity) {
-        const stars = Math.round(popularity * 5);
-        let result = '';
-        
-        for (let i = 0; i < 5; i++) {
-            if (i < stars) {
-                result += '★'; // Filled star
-            } else {
-                result += '☆'; // Empty star
-            }
-        }
-        
-        return result;
+  const stars = Math.round(popularity * 5);
+  let result = '';
+  for (let i = 0; i < 5; i++) {
+    if (i < stars) {
+      result += '★'; // Filled star
+    } else {
+      result += '☆'; // Empty star
     }
+  }
+  return result;
+}
+    
 };
 
 // Make UI available globally

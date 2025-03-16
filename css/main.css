@@ -65,17 +65,18 @@ button {
     border: none;
     background: none;
     font-weight: 500;
-  transition: transform 0.1s, opacity 0.1s;
+    transition: all var(--transition-speed) ease, transform 0.1s, opacity 0.1s;
+}
+
+/* Button pressed state */
+.button-pressed {
+    transform: scale(0.95);
+    opacity: 0.9;
 }
 
 button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
-}
-
-.button-pressed {
-  transform: scale(0.95);
-  opacity: 0.9;
 }
 
 img {
@@ -284,8 +285,10 @@ img {
     flex-direction: column;
 }
 
-.shop-scene {
+.shop-scene, .store-view-container {
     flex: 1;
+    min-height: 400px;
+    height: 60vh;
     position: relative;
     overflow: hidden;
     background-color: var(--background-color);
@@ -342,7 +345,7 @@ img {
     right: 40px;
     width: 60px;
     height: 80px;
-    background-image: url('assets/images/benjamin.png');
+    background-image: url('assets/images/characters/shopkeeper.png');
     background-size: contain;
     background-position: bottom;
     background-repeat: no-repeat;
@@ -423,6 +426,21 @@ img {
     color: var(--text-color);
 }
 
+/* Empty shelves notice */
+.empty-shelves-notice {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    max-width: 80%;
+    color: var(--text-light);
+    border: 2px dashed var(--border-color);
+}
+
 /* Customer styles */
 .customer {
     position: absolute;
@@ -483,6 +501,27 @@ img {
 
 .customer-thought.visible {
     opacity: 1;
+}
+
+/* Mentor styling */
+.mentor {
+    z-index: 10;
+}
+
+.mentor-avatar {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #b392ac;
+}
+
+.mentor-thought {
+    background-color: #f8e0ff;
+    border: 2px solid #b392ac;
+    max-width: 200px;
+    font-weight: 500;
+}
+
+.mentor-thought:after {
+    border-top-color: #f8e0ff;
 }
 
 /* Customer animations */
@@ -845,7 +884,7 @@ img {
     border-radius: var(--border-radius);
 }
 
-.confirm-btn, .save-btn, .next-btn, .continue-btn {
+.confirm-btn, .save-btn, .next-btn, .continue-btn, .start-btn {
     background-color: var(--primary-color);
     color: white;
     padding: 8px 16px;
@@ -891,7 +930,7 @@ img {
     transition: width 0.5s ease;
 }
 
-/* Enhanced tutorial styling */
+/* Tutorial modal */
 .tutorial-modal .modal-content {
     max-width: 600px;
 }
@@ -923,18 +962,6 @@ img {
 
 .tutorial-section li {
     margin-bottom: 5px;
-}
-
-.start-btn {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 8px 16px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-}
-
-.start-btn:hover {
-    background-color: var(--primary-dark);
 }
 
 /* ---------- Notifications ---------- */
@@ -1104,6 +1131,10 @@ img {
         flex: none;
     }
     
+    .shop-scene, .store-view-container {
+        height: 300px; /* Smaller height on mobile */
+    }
+    
     .modal {
         width: 95%;
         max-width: none;
@@ -1135,4 +1166,279 @@ img {
     #shopView {
         flex: 3;
     }
+    
+    .shop-scene, .store-view-container {
+        min-height: 500px;
+        height: 70vh;
+    }
+    
+    /* Keep content within view */
+    .shop-shelves, .shop-floor {
+        position: absolute;
+        width: 100%;
+    }
+    
+    .shop-counter {
+        bottom: 30px;
+        right: 30px;
+        width: 150px;
+        height: 100px;
+    }
+    
+    .shopkeeper {
+        bottom: 40px;
+        right: 50px;
+        width: 70px;
+        height: 100px;
+    }
+}
+
+/* ---------- 3D Store View Styles ---------- */
+/* Store view container */
+.store-view-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Controls panel */
+.store-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.store-control-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.store-control-button:hover {
+    transform: scale(1.1);
+    background-color: var(--primary-dark);
+}
+
+.store-control-button:active {
+    transform: scale(0.95);
+}
+
+.store-control-button.active {
+    background-color: var(--success-color);
+}
+
+/* Store customization panel */
+.store-customization {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    width: 250px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+    transform: translateX(calc(100% + 20px));
+}
+
+.store-customization.open {
+    transform: translateX(0);
+}
+
+.customization-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.customization-header h3 {
+    margin: 0;
+    font-size: var(--font-md);
+    color: var(--primary-dark);
+}
+
+.close-panel {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+.customization-section {
+    margin-bottom: 15px;
+}
+
+.customization-section h4 {
+    margin: 0 0 8px 0;
+    font-size: var(--font-sm);
+    color: var(--text-color);
+}
+
+/* Color options for customization */
+.color-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+/* Store layout selector */
+#storeLayoutSelect {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: white;
+    margin-bottom: 10px;
+    font-family: inherit;
+}
+
+.save-layout-btn {
+    width: 100%;
+    padding: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-layout-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Loading and error messages for 3D view */
+.store-view-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    max-width: 80%;
+}
+
+.store-view-message.error {
+    border-left: 4px solid var(--error-color);
+}
+
+.store-view-message.loading {
+    border-left: 4px solid var(--primary-color);
+}
+
+/* Improvements for the shop content layout when using 3D view */
+#shopView {
+    display: flex;
+    flex-direction: column;
+}
+
+.store-view-container {
+    flex: 1;
+    min-height: 400px;
+    margin-bottom: 10px;
+}
+
+.shop-dashboard {
+    height: auto;
+}
+
+/* Animation for controls */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.store-control-button:focus {
+    animation: pulse 1s infinite;
+    outline: none;
+}
+
+/* Animation for buttons */
+@keyframes buttonPress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.action-button:active, .display-btn:active, .buy-btn:active, .use-btn:active,
+.confirm-btn:active, .save-btn:active, .next-btn:active, .prev-btn:active, 
+.start-btn:active, .cancel-btn:active, .close-modal-btn:active {
+    animation: buttonPress 0.2s ease;
+}
+
+/* Debug helper for element outlines */
+.debug-outline * {
+    outline: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+/* Ensure buttons show some feedback */
+button {
+    position: relative;
+    overflow: hidden;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+button:active::after {
+    opacity: 1;
+    transform: scale(20, 20) translate(-50%, -50%);
+    transition: all 0.5s;
 }

@@ -829,6 +829,10 @@ const UI = {
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Buy Item</h3>
+                    <button class="close-btn">&times;
+                    <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Buy Item</h3>
                     <button class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -1073,17 +1077,17 @@ const UI = {
     },
     
     // Close any open modal
-      closeModal() {
-    this.elements.modalContainer.classList.remove('active');
-    
-    // Clear content immediately to avoid DOM issues
-    this.elements.modalContainer.innerHTML = '';
-    
-    // Reset any stuck state
-    document.body.classList.remove('modal-open');
-    
-    console.log("Modal closed and cleared");
-}
+    closeModal() {
+        this.elements.modalContainer.classList.remove('active');
+        
+        // Clear content immediately to avoid DOM issues
+        this.elements.modalContainer.innerHTML = '';
+        
+        // Reset any stuck state
+        document.body.classList.remove('modal-open');
+        
+        console.log("Modal closed and cleared");
+    },
     
     // Show a notification message
     showNotification(message, type = 'info') {
@@ -1293,134 +1297,86 @@ const UI = {
     
     // Show tutorial
     showTutorial() {
-        // Get current tutorial step
-        const tutorial = GameState.get().tutorial;
-        const currentStep = tutorial.currentStep;
-        const stepName = tutorial.steps[currentStep];
-        
-        let title, content;
-        
-        // Set content based on step
-        switch (stepName) {
-            case 'welcome':
-                title = 'Welcome to Your Cozy Shop!';
-                content = `
-                    <p>Welcome to your very own shop! This tutorial will guide you through the basics of running your business.</p>
-                    <p>As a shop owner, you'll buy items, display them in your shop, and sell them to customers for a profit.</p>
-                `;
-                break;
-            case 'inventory':
-                title = 'Managing Your Inventory';
-                content = `
-                    <p>Click the Inventory tab to see what items you have available.</p>
-                    <p>Visit the Catalog tab to buy new items from wholesalers. Remember to buy at a good price!</p>
-                    <p>From your inventory, you can choose which items to display in your shop.</p>
-                `;
-                break;
-            case 'customers':
-                title = 'Dealing with Customers';
-                content = `
-                    <p>When your shop is open, customers will visit throughout the day.</p>
-                    <p>Different customers have different preferences and budgets.</p>
-                    <p>Price your items strategically to maximize profits while keeping customers happy!</p>
-                `;
-                break;
-            case 'sales':
-                title = 'Making Sales';
-                content = `
-                    <p>Customers will browse your shop and may purchase items they like.</p>
-                    <p>Each sale earns you coins and a bit of reputation.</p>
-                    <p>The more satisfied your customers are, the better your reputation will become!</p>
-                `;
-                break;
-            case 'closing':
-                title = 'Day End & Shop Management';
-                content = `
-                    <p>At the end of the day, close your shop to see a summary of your sales.</p>
-                    <p>Use your earnings to restock inventory and decorate your shop.</p>
-                    <p>Better decorations will attract more customers!</p>
-                `;
-                break;
-            default:
-                title = 'Tutorial Complete!';
-                content = `
-                    <p>Congratulations! You now know the basics of running your shop.</p>
-                    <p>Continue to grow your business, unlock new items, and become the coziest shop in town!</p>
-                `;
-        }
-        
+        // Create a single comprehensive tutorial instead of multiple steps
         const modal = document.createElement('div');
         modal.classList.add('modal', 'tutorial-modal');
         
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>${title}</h3>
+                    <h3>Welcome to Your Cozy Shop!</h3>
                     <button class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body tutorial-body">
-                    ${content}
+                    <div class="tutorial-section">
+                        <h4>Getting Started</h4>
+                        <p>Welcome to your very own shop! Here's how to get started:</p>
+                        <ul>
+                            <li>Use the <strong>Catalog tab</strong> to buy new items for your shop</li>
+                            <li>Check your <strong>Inventory tab</strong> to see what you own</li>
+                            <li>Display items in your shop to sell them to customers</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h4>Selling to Customers</h4>
+                        <p>When your shop is ready:</p>
+                        <ul>
+                            <li>Click the <strong>Open Shop</strong> button to start business</li>
+                            <li>Customers will enter and browse your items</li>
+                            <li>They'll buy things they like if priced appropriately</li>
+                            <li>Close the shop at the end of the day to see your profits</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h4>Growing Your Business</h4>
+                        <p>Use your profits to improve your shop:</p>
+                        <ul>
+                            <li>Buy more inventory to offer variety</li>
+                            <li>Decorate your shop to attract more customers</li>
+                            <li>Set strategic prices to maximize profits</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    ${currentStep > 0 ? '<button class="prev-btn">Previous</button>' : ''}
-                    ${currentStep < tutorial.steps.length - 1 ? '<button class="next-btn">Next</button>' : ''}
-                    <button class="finish-btn">Finish Tutorial</button>
+                    <button class="start-btn">Start Playing!</button>
                 </div>
             </div>
         `;
         
-        this.elements.modalContainer.innerHTML = '';
-        this.elements.modalContainer.appendChild(modal);
-        this.elements.modalContainer.classList.add('active');
+        // Clear and add content
+        const container = this.elements.modalContainer;
+        container.innerHTML = '';
+        container.appendChild(modal);
+        
+        // Show with a slight delay to ensure proper rendering
+        setTimeout(() => {
+            container.classList.add('active');
+        }, 50);
         
         // Add event listeners
         const closeBtn = modal.querySelector('.close-btn');
-        const prevBtn = modal.querySelector('.prev-btn');
-        const nextBtn = modal.querySelector('.next-btn');
-        const finishBtn = modal.querySelector('.finish-btn');
+        const startBtn = modal.querySelector('.start-btn');
         
-        closeBtn.addEventListener('click', () => {
-            this.closeModal();
-        });
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                // Go to previous step
-                if (currentStep > 0) {
-                    GameState.get().tutorial.currentStep = currentStep - 1;
-                    this.closeModal();
-                    this.showTutorial();
-                }
-            });
-        }
-        
-      if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-        // Go to next step
-        if (currentStep < tutorial.steps.length - 1) {
-            // Store new step in temporary variable (don't update gameState yet)
-            const nextStep = currentStep + 1;
+        const handleClose = () => {
+            // Remove active class
+            container.classList.remove('active');
             
-            // First completely close the current modal
-            this.closeModal();
-            
-            // Then wait for animation to complete before showing next screen
+            // Clear content after transition
             setTimeout(() => {
-                // Now update the gameState with the new step
-                GameState.get().tutorial.currentStep = nextStep;
-                // And show the new tutorial screen
-                this.showTutorial();
-            }, 500); // Increase timeout to ensure modal is fully closed
-        }
-    });
-}
+                container.innerHTML = '';
+                
+                // Mark tutorial as completed
+                GameState.get().tutorial.completed = true;
+                
+                // Show welcome notification
+                this.showNotification('Welcome to your shop! Start by buying items in the Catalog tab.', 'success');
+            }, 300);
+        };
         
-        finishBtn.addEventListener('click', () => {
-            // Complete tutorial
-            GameState.get().tutorial.completed = true;
-            this.closeModal();
-            this.showNotification('Tutorial completed!', 'success');
-        });
+        closeBtn.addEventListener('click', handleClose);
+        startBtn.addEventListener('click', handleClose);
     },
     
     // Show loading screen

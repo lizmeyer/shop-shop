@@ -304,3 +304,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make Game object available globally
 window.Game = Game;
+
+// Debug helper for modal issues
+window.debugModals = function() {
+  const container = document.querySelector('.modal-container');
+  console.log('Modal container:', container);
+  console.log('Is visible:', container.classList.contains('active'));
+  console.log('Content:', container.innerHTML);
+  
+  // Force reset modal if stuck
+  window.resetModal = function() {
+    container.classList.remove('active');
+    setTimeout(() => {
+      container.innerHTML = '';
+      console.log('Modal forcibly reset');
+    }, 100);
+  };
+  
+  console.log('Type "resetModal()" to force reset a stuck modal');
+};
+
+// Run this after page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a bit for other scripts to load
+  setTimeout(window.debugModals, 2000);
+});

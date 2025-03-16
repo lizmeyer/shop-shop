@@ -1073,12 +1073,17 @@ const UI = {
     },
     
     // Close any open modal
-    closeModal() {
-        this.elements.modalContainer.classList.remove('active');
-        setTimeout(() => {
-            this.elements.modalContainer.innerHTML = '';
-        }, 300);
-    },
+      closeModal() {
+    this.elements.modalContainer.classList.remove('active');
+    
+    // Clear content immediately to avoid DOM issues
+    this.elements.modalContainer.innerHTML = '';
+    
+    // Reset any stuck state
+    document.body.classList.remove('modal-open');
+    
+    console.log("Modal closed and cleared");
+}
     
     // Show a notification message
     showNotification(message, type = 'info') {

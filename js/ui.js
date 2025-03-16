@@ -1389,16 +1389,26 @@ const UI = {
             });
         }
         
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                // Go to next step
-                if (currentStep < tutorial.steps.length - 1) {
-                    GameState.get().tutorial.currentStep = currentStep + 1;
-                    this.closeModal();
-                    this.showTutorial();
-                }
-            });
+      if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+        // Go to next step
+        if (currentStep < tutorial.steps.length - 1) {
+            // Store new step in temporary variable (don't update gameState yet)
+            const nextStep = currentStep + 1;
+            
+            // First completely close the current modal
+            this.closeModal();
+            
+            // Then wait for animation to complete before showing next screen
+            setTimeout(() => {
+                // Now update the gameState with the new step
+                GameState.get().tutorial.currentStep = nextStep;
+                // And show the new tutorial screen
+                this.showTutorial();
+            }, 500); // Increase timeout to ensure modal is fully closed
         }
+    });
+}
         
         finishBtn.addEventListener('click', () => {
             // Complete tutorial
